@@ -74,7 +74,7 @@
 		});
 
     queue()   // permet de charger les fichiers de manière asynchrone
-  	.defer(d3.json, "file://france-departement.json")
+  	.defer(d3.json, "france-departement.json")
   	//.defer(d3.csv, "grippe-2014.csv")
     .defer(d3.csv, "GrippeFrance2003-15.csv")
   	.await(processData);  // une fois les fichiers chargé, la fonction processData
