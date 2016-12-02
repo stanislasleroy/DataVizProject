@@ -1,0 +1,225 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+  </style>
+</head>
+<style>
+    .province {
+        fill: #000;
+        stroke: #fff;
+        stroke-width: 1px;
+    }
+    .province:hover {
+        fill: #666;
+    }
+    .hidden {
+        display: none;
+    }
+    div.tooltip {
+        color: #222;
+        background-color: #fff;
+        padding: .5em;
+        text-shadow: #f5f5f5 0 1px 0;
+        border-radius: 2px;
+        opacity: 0.9;
+        position: absolute;
+    }
+</style>
+<body>
+  <div>
+  	<input id="slider" type="range" value="1" min="1" max="100" step="1" />
+  	<span id="week">week</span>
+	</div>
+  <script>
+		var width = 800,
+  		  height = 1000;
+
+    var data;
+    var jsonData;
+
+    var max = 0;
+    var min = 1000;
+
+		var svg = d3.select( "body" )
+  		.append( "svg" )
+		  .attr( "width", width )
+		  .attr( "height", height );
+
+    var projection = d3.geo.conicConformal()
+    	.center([2.454071, 46.279229]).scale(3000);
+
+    var tooltip = d3.select('body').append('div')
+            .attr('class', 'hidden tooltip');
+
+    var carte = svg.append( "carte" );
+
+		var color = d3.scale.quantize()
+    			.range(["rgb(254,229,217)",
+									"rgb(252,187,161)",
+                  "rgb(252,146,114)",
+                  "rgb(251,106,74)",
+                  "rgb(239,59,44)",
+                 	"rgb(203,24,29)",
+                  "rgb(153,0,13)"]);
+
+    var path = d3.geo.path()
+                 .projection(projection);
+
+    d3.select("#slider").on("input", function() {
+			updateViz(+this.value);
+		});
+
+    queue()   // permet de charger les fichiers de manière asynchrone
+  	.defer(d3.json, "file://france-departement.json")
+  	//.defer(d3.csv, "grippe-2014.csv")
+    .defer(d3.csv, "GrippeFrance2003-15.csv")
+  	.await(processData);  // une fois les fichiers chargé, la fonction processData
+                          // est appelée avec les fichiers en arguments
+
+
+
+    function processData(error, francejson, grippedata) {
+
+      	var weeks = [];
+
+     		data = grippedata;
+      	jsonData = francejson;
+
+        for (var j = 0; j < grippedata.length; j++) {
+
+          var array = grippedata[j];
+
+          for(var k in array) {
+            if(weeks.indexOf(k) == -1
+               && k != "region"
+               && k != "somme2014") {
+              weeks.push(k);
+            }
+          }
+        }
+
+      	//console.log("Number of weeks : " + weeks.length);
+      	d3.select('#slider').attr("max", weeks.length)
+
+        for (var i = 0; i < grippedata.length; i++) {
+
+          //Nom de la région
+          var dataState = grippedata[i].region;
+
+          //console.log(dataState);
+
+          //Valeur associee à la région
+          var dataValue = Object.values(grippedata[i]);
+
+          for(var j = 1; j < dataValue.length - 1; j++) {
+
+            if( dataValue[j] != "region" && dataValue[j] != "somme2014") {
+
+              if(+dataValue[j] < min){
+                min = dataValue[j];
+              }
+
+              if(+dataValue[j] > max){
+                max = dataValue[j];
+              }
+            }
+          }
+
+        	color.domain([min, max]);
+
+          //Recherche de l'etat dans le GeoJSON
+          for (var j = 0; j < francejson.features.length; j++) {
+            var jsonState = francejson.features[j].properties.nom;
+            if (dataState == jsonState) {
+              //On injecte la valeur de l'Etat dans le json
+              francejson.features[j].properties.value = dataValue;
+
+              //Pas besoin de chercher plus loin
+              break;
+            }
+          }
+        }
+
+      updateViz(1);
+     }
+
+    function updateViz(value){
+
+    	var weeksArray = Object.keys(data[0]);
+     	d3.select('#week').html(weeksArray[value]);
+
+     	drawMap(jsonData, value);
+    }
+
+		function drawMap(json, currentWeek) {
+
+      carte = svg.selectAll("path")
+        .data(json.features);
+
+      // code en cas de mise a jour de la carte / de changement de semaine
+      carte.attr("class", "update")
+				.on('mousemove', function(d) {
+
+          var mouse = d3.mouse(svg.node()).map(function(d) {
+            return parseInt(d);
+          });
+
+          tooltip.classed('hidden', false)
+            .attr('style', 'left:' + (mouse[0] + 15) +
+                  'px; top:' + (mouse[1] - 35) + 'px')
+            .html(d.properties.nom + " : " + d.properties.value[currentWeek]);
+        })
+        .on('mouseout', function() {
+          tooltip.classed('hidden', true);
+        })
+      	.style("fill", function(d) {
+            //on prend la valeur recuperée plus haut
+            var value = d.properties.value;
+
+            if (value) {
+              console.log("value : " + value[currentWeek]);
+              return color(value[currentWeek]);
+            } else {
+              // si pas de valeur alors en gris
+              return "#ccc";
+            }
+        });
+
+      // code pour la creation de la carte quand les donnees sont chargees la 1e fois.
+      carte.enter()
+        .append("path")
+        .attr("class", "enter")
+      	.attr("d", path)
+        .on('mousemove', function(d) {
+
+          var mouse = d3.mouse(svg.node()).map(function(d) {
+            return parseInt(d);
+          });
+
+          tooltip.classed('hidden', false)
+            .attr('style', 'left:' + (mouse[0] + 15) +
+                  'px; top:' + (mouse[1] - 35) + 'px')
+            .html(d.properties.nom + " : " + d.properties.value[currentWeek]);
+        })
+        .on('mouseout', function() {
+          tooltip.classed('hidden', true);
+        })
+        .style("fill", function(d) {
+            //on prend la valeur recupere plus haut
+            var value = d.properties.value;
+
+            if (value) {
+              return color(value[currentWeek]);
+            } else {
+              // si pas de valeur alors en gris
+              return "#ccc";
+            }
+        });
+    }
+  </script>
+</body>
+</html>
