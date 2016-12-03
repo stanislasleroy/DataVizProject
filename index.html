@@ -81,29 +81,56 @@
         g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
 
-
+    // Affichage des stations de métro
     d3.json("ligne_metro.json", function(error, collection) {
       if (error) throw error;
 
     var transform = d3.geo.transform({point: projectPoint}),
           path = d3.geo.path().projection(transform);
- /*
-        var projection = d3.geo.conicConformal()
-          .center([4.850000, 45.750000]).scale(800000);
 
-        var path = d3.geo.path()
-          .projection(projection);
-
-          svg.selectAll(".geojson").data(collection)
-          .enter()
-          .append("path")
-          .attr("class","geojson")
-          .attr("d", path);
- */
        var feature = g.selectAll("path")
            .data(collection.features)
            .enter().append("path")
-          .style({'fill': '#B10000', 'fill-opacity': 0.3});
+          .style({'fill': '#B10000', 'fill-opacity': 0.0})
+          .style({'stroke-width': 1, 'stroke': '#B10000', 'stroke-linejoin': 'round'});
+
+      map.on("viewreset", reset);
+      reset();
+
+      // Reposition the SVG to cover the features.
+      function reset() {
+        var bounds = path.bounds(collection),
+            topLeft = bounds[0],
+            bottomRight = bounds[1];
+
+        svg .attr("width", bottomRight[0] - topLeft[0])
+            .attr("height", bottomRight[1] - topLeft[1])
+            .style("left", topLeft[0] + "px")
+            .style("top", topLeft[1] + "px");
+
+        g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+        feature.attr("d", path);
+      }
+
+      // Use Leaflet to implement a D3 geometric transformation.
+      function projectPoint(x, y) {
+        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+        this.stream.point(point.x, point.y);
+      }
+    });
+
+
+    // Affichage des stations Vélo'v
+    d3.json("stations.json", function(error, collection) {
+      if (error) throw error;
+
+    var transform = d3.geo.transform({point: projectPoint}),
+          path = d3.geo.path().projection(transform);
+
+       var feature = g.selectAll("path")
+           .data(collection.features)
+           .enter().append("path");
 
       map.on("viewreset", reset);
       reset();
