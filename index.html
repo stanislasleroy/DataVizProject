@@ -33,7 +33,10 @@
   </head>
 
   <body>
-
+    <div>
+      <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+      <span id="week">heure</span>
+    </div>
       <div id="map">
 
       <!--<div id="map" style="width: 600px; height: 400px"></div>-->
@@ -92,14 +95,14 @@
                      .style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
                      .style("fill", function(d) {
 
-                       console.log(d.properties.stationbonus);
+                       //console.log(d.properties.stationbonus);
 
                          var returnColor;
 
                          if (d.properties.stationbonus === "Oui") {
                            returnColor = "#FFBF00";
                        } else {
-                         returnColor = "gray";
+                         returnColor = "#d3d3d3";
                        }
                         return returnColor;
                      })
@@ -190,7 +193,14 @@
                      .data(collection.features)
                      .enter().append("path")
                     .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                    .style({'stroke-width': 3, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'});
+                    .style({'stroke-width': 3, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                    .style("stroke", function(d) {
+
+                      var array = d.properties.couleur.split(" ");
+
+                      var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                      return color ;
+                    });
 
                 map.on("viewreset", reset);
                 console.log("reset2");
@@ -199,7 +209,7 @@
                 // Reposition the SVG to cover the features.
                 function reset() {
 
-console.log("Reset metro");
+                  console.log("Reset metro");
 
                   var bounds = path.bounds(collection),
                       topLeft = bounds[0],
