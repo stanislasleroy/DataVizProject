@@ -1,349 +1,228 @@
 <html>
-<head>
-  <meta charset="utf-8">
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-  <script src="http://d3js.org/queue.v1.min.js"></script>
-   <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
-  <style>
-    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
-  </style>
-</head>
-<style>
-    .province {
-        fill: #000;
-        stroke: #fff;
-        stroke-width: 1px;
-    }
-    .province:hover {
-        fill: #666;
-    }
-    .hidden {
-        display: none;
-    }
-    div.tooltip {
-        color: #222;
-        background-color: #fff;
-        padding: .5em;
-        text-shadow: #f5f5f5 0 1px 0;
-        border-radius: 2px;
-        opacity: 0.9;
-        position: absolute;
-    }
-    .geojson {
- fill: none;
- stroke: red;
- stroke-width: 5;
-}
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-</style>
-<body>
-  <div>
-  	<input id="slider" type="range" value="1" min="1" max="100" step="1" />
-  	<span id="week">week</span>
-	</div>
-  <div id="map"></div>
+  <head>
+    <meta charset="utf-8">
+    <link
+          rel="stylesheet"
+          href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"
+      />
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script
+          src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js">
+      </script>
+    <style>
+      body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
 
-  <script>
-		//var width = 1200,
-  	//	  height = 1000;
-
-    var data;
-    var jsonData;
-
-    var max = 0;
-    var min = 1000;
-
-// /*
-    var map = L.map('map').setView([45.750000, 4.850000], 13);
-
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      maxZoom: 18,
-      id: 'stanislasleroy.293gad2b',
-      accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
-    }).addTo(map);
-
-
-// */
- /*
-    var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
-        .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
- */
-
-
-
-
-    var svg = d3.select(map.getPanes().overlayPane).append("svg"),
-        g = svg.append("g").attr("class", "leaflet-zoom-hide");
-
-
-    // Affichage des stations de métro
-    d3.json("ligne_metro.json", function(error, collection) {
-      if (error) throw error;
-
-    var transform = d3.geo.transform({point: projectPoint}),
-          path = d3.geo.path().projection(transform);
-
-       var feature = g.selectAll("path")
-           .data(collection.features)
-           .enter().append("path")
-          .style({'fill': '#B10000', 'fill-opacity': 0.0})
-          .style({'stroke-width': 1, 'stroke': '#B10000', 'stroke-linejoin': 'round'});
-
-      map.on("viewreset", reset);
-      reset();
-
-      // Reposition the SVG to cover the features.
-      function reset() {
-        var bounds = path.bounds(collection),
-            topLeft = bounds[0],
-            bottomRight = bounds[1];
-
-        svg .attr("width", bottomRight[0] - topLeft[0])
-            .attr("height", bottomRight[1] - topLeft[1])
-            .style("left", topLeft[0] + "px")
-            .style("top", topLeft[1] + "px");
-
-        g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-        feature.attr("d", path);
+      #map {
+        width: 100%;
+        height: 100%;
+      }
+      .hidden {
+          display: none;
+      }
+      div.tooltip {
+          color: #222;
+          background-color: #fff;
+          padding: .5em;
+          text-shadow: #f5f5f5 0 1px 0;
+          border-radius: 2px;
+          opacity: 0.9;
+          position: absolute;
       }
 
-      // Use Leaflet to implement a D3 geometric transformation.
-      function projectPoint(x, y) {
-        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-        this.stream.point(point.x, point.y);
-      }
-    });
+    </style>
+  </head>
 
+  <body>
 
-    // Affichage des stations Vélo'v
-    d3.json("stations.json", function(error, collection) {
-      if (error) throw error;
+      <div id="map">
 
-    var transform = d3.geo.transform({point: projectPoint}),
-          path = d3.geo.path().projection(transform);
+      <!--<div id="map" style="width: 600px; height: 400px"></div>-->
 
-       var feature = g.selectAll("path")
-           .data(collection.features)
-           .enter().append("path");
+      <script>
 
-      map.on("viewreset", reset);
-      reset();
-
-      // Reposition the SVG to cover the features.
-      function reset() {
-        var bounds = path.bounds(collection),
-            topLeft = bounds[0],
-            bottomRight = bounds[1];
-
-        svg .attr("width", bottomRight[0] - topLeft[0])
-            .attr("height", bottomRight[1] - topLeft[1])
-            .style("left", topLeft[0] + "px")
-            .style("top", topLeft[1] + "px");
-
-        g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-        feature.attr("d", path);
-      }
-
-      // Use Leaflet to implement a D3 geometric transformation.
-      function projectPoint(x, y) {
-        var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-        this.stream.point(point.x, point.y);
-      }
-    });
-
-
-
-
-
+          //var map = L.map('map').setView([-41.2858, 174.7868], 13);
 /*
-		var svg = d3.select( "body" )
-  		.append( "svg" )
-		  .attr( "width", width )
-		  .attr( "height", height );
+          mapLink =
+              '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+          L.tileLayer(
+              'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; ' + mapLink + ' Contributors',
+              maxZoom: 18,
+              }).addTo(map);
+              */
 
+              //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
+                // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-    var projection = d3.geo.conicConformal()
-    	//.center([2.454071, 46.279229]).scale(10000);
-      .center([4.850000, 45.750000]).scale(800000);
+                var map = L.map('map').setView([45.750000, 4.850000], 13);
 
-    var tooltip = d3.select('body').append('div')
-            .attr('class', 'hidden tooltip');
-
-    var carte = svg.append( "carte" );
-
-		var color = d3.scale.quantize()
-    			.range(["rgb(254,229,217)",
-									"rgb(252,187,161)",
-                  "rgb(252,146,114)",
-                  "rgb(251,106,74)",
-                  "rgb(239,59,44)",
-                 	"rgb(203,24,29)",
-                  "rgb(153,0,13)"]);
-
-    var path = d3.geo.path()
-                 .projection(projection);
-
-    d3.select("#slider").on("input", function() {
-			updateViz(+this.value);
-		});
-
-    queue()   // permet de charger les fichiers de manière asynchrone
-  	//.defer(d3.json, "france-departement.json")
-    .defer(d3.json, "stations.json")
-  	//.defer(d3.csv, "grippe-2014.csv")
-    .defer(d3.csv, "GrippeFrance2003-15.csv")
-  	.await(processData);  // une fois les fichiers chargé, la fonction processData
-                          // est appelée avec les fichiers en arguments
+                L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                  maxZoom: 18,
+                  id: 'stanislasleroy.293gad2b',
+                  accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
+                }).addTo(map);
 
 
 
-    function processData(error, francejson, grippedata) {
+              var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+                  g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-      	var weeks = [];
 
-     		data = grippedata;
-      	jsonData = francejson;
+                  var tooltip = d3.select('body').append('div')
+                  	.attr('class', 'hidden tooltip');
 
-        for (var j = 0; j < grippedata.length; j++) {
 
-          var array = grippedata[j];
 
-          for(var k in array) {
-            if(weeks.indexOf(k) == -1
-               && k != "region"
-               && k != "somme2014") {
-              weeks.push(k);
-            }
-          }
-        }
 
-      	//console.log("Number of weeks : " + weeks.length);
-      	d3.select('#slider').attr("max", weeks.length)
 
-        for (var i = 0; i < grippedata.length; i++) {
 
-          //Nom de la région
-          var dataState = grippedata[i].region;
 
-          //console.log(dataState);
+              // Affichage des stations Vélo'v
 
-          //Valeur associee à la région
-          var dataValue = Object.values(grippedata[i]);
+              d3.json("stations.json", function(error, collection2) {
+                if (error) throw error;
 
-          for(var j = 1; j < dataValue.length - 1; j++) {
+              var transform2 = d3.geo.transform({point: projectPoint2}),
+                    path2 = d3.geo.path().projection(transform2).pointRadius(4);
 
-            if( dataValue[j] != "region" && dataValue[j] != "somme2014") {
+                 var feature2 = g.selectAll("path")
+                     .data(collection2.features)
+                     .enter().append("path")
+                     .style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
+                     .style("fill", function(d) {
 
-              if(+dataValue[j] < min){
-                min = dataValue[j];
-              }
+                       console.log(d.properties.stationbonus);
 
-              if(+dataValue[j] > max){
-                max = dataValue[j];
-              }
-            }
-          }
+                         var returnColor;
 
-        	color.domain([min, max]);
+                         if (d.properties.stationbonus === "Oui") {
+                           returnColor = "#FFBF00";
+                       } else {
+                         returnColor = "gray";
+                       }
+                        return returnColor;
+                     })
+                     /*.style("stroke-width", function(d) {
 
-          //Recherche de l'etat dans le GeoJSON
-          for (var j = 0; j < francejson.features.length; j++) {
-            var jsonState = francejson.features[j].properties.nom;
-            if (dataState == jsonState) {
-              //On injecte la valeur de l'Etat dans le json
-              francejson.features[j].properties.value = dataValue;
+                       console.log(d.properties.nbbornettes);
 
-              //Pas besoin de chercher plus loin
-              break;
-            }
-          }
-        }
+                         var size;
 
-      updateViz(1);
-     }
+                         if (d.properties.nbbornettes < 15) {
+                           size = 2;
+                       } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
+                         size = 4;
+                       } else {
+                         size = 6;
+                       }
+                        return size;
+                     })*/
+                     .on('mousemove', function(d) {
 
-    function updateViz(value){
+                       var mouse = d3.mouse(svg.node()).map(function(d) {
+                         return parseInt(d);
+                       });
 
-    	var weeksArray = Object.keys(data[0]);
-     	d3.select('#week').html(weeksArray[value]);
+                         //console.log(d);
 
-     	drawMap(jsonData, value);
-    }
+                          tooltip.classed('hidden', false)
+                           .attr('style', 'left:' + (mouse[0]) +
+                                 'px; top:' + (mouse[1]) + 'px')
+                           .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
 
-		function drawMap(json, currentWeek) {
+                           //d3.select(this).style("width", "10");
+                           //d3.select(this).style("fill", "pink");
+                           d3.select(this).style("stroke", "red");
+                           d3.select(this).style("stroke-width", "15");
+                           //d3.select(this).style("pointRadius", "10");
+                     })
+                     .on('mouseout', function() {
+                       tooltip.classed('hidden', true);
+                      // On remet l'opacité à 1
+                      d3.select(this).style("stroke", "black");
+                      d3.select(this).style("stroke-width", "2");
 
-      carte = svg.selectAll("path")
-        .data(json.features);
+                     });
 
-      // code en cas de mise a jour de la carte / de changement de semaine
-      carte.attr("class", "update")
-				.on('mousemove', function(d) {
 
-          var mouse = d3.mouse(svg.node()).map(function(d) {
-            return parseInt(d);
-          });
+                map.on("viewreset", reset2);
+                console.log("reset1");
+                reset2();
 
-          tooltip.classed('hidden', false)
-            .attr('style', 'left:' + (mouse[0] + 15) +
-                  'px; top:' + (mouse[1] - 35) + 'px')
-            .html(d.properties.nom + " : " + d.properties.value[currentWeek]);
-        })
-        .on('mouseout', function() {
-          tooltip.classed('hidden', true);
-        })
-      	.style("fill", function(d) {
-            //on prend la valeur recuperée plus haut
-            var value = d.properties.value;
+                // Reposition the SVG to cover the features.
+                function reset2() {
+                  var bounds2 = path2.bounds(collection2),
+                      topLeft2 = bounds2[0],
+                      bottomRight2 = bounds2[1];
 
-            if (value) {
-              console.log("value : " + value[currentWeek]);
-              return color(value[currentWeek]);
-            } else {
-              // si pas de valeur alors en gris
-              return "#ccc";
-            }
-        });
+                  svg .attr("width", bottomRight2[0] - topLeft2[0])
+                      .attr("height", bottomRight2[1] - topLeft2[1])
+                      .style("left", topLeft2[0] + "px")
+                      .style("top", topLeft2[1] + "px");
 
-      // code pour la creation de la carte quand les donnees sont chargees la 1e fois.
-      carte.enter()
-        .append("path")
-        .attr("class", "enter")
-      	.attr("d", path)
-        .on('mousemove', function(d) {
+                  g.attr("transform", "translate(" + -topLeft2[0] + "," + -topLeft2[1] + ")");
 
-          var mouse = d3.mouse(svg.node()).map(function(d) {
-            return parseInt(d);
-          });
+                  feature2.attr("d", path2);
+                }
 
-          tooltip.classed('hidden', false)
-            .attr('style', 'left:' + (mouse[0] + 15) +
-                  'px; top:' + (mouse[1] - 35) + 'px')
-            .html(d.properties.nom + " : " + d.properties.value[currentWeek]);
-        })
-        .on('mouseout', function() {
-          tooltip.classed('hidden', true);
-        })
-        .style("fill", function(d) {
-            //on prend la valeur recupere plus haut
-            var value = d.properties.value;
+                // Use Leaflet to implement a D3 geometric transformation.
+                function projectPoint2(x, y) {
+                  var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                  this.stream.point(point.x, point.y);2
+                }
+              });
 
-            if (value) {
-              return color(value[currentWeek]);
-            } else {
-              // si pas de valeur alors en gris
-              return "#ccc";
-            }
-        });
-    }
 
-    */
-  </script>
-</body>
+
+
+
+
+
+              // Affichage des stations de métro
+              d3.json("ligne_metro.json", function(error, collection) {
+                if (error) throw error;
+
+              var transform = d3.geo.transform({point: projectPoint}),
+                    path = d3.geo.path().projection(transform);
+
+                 var feature = g.selectAll("path")
+                     .data(collection.features)
+                     .enter().append("path")
+                    .style({'fill': '#B10000', 'fill-opacity': 0.0})
+                    .style({'stroke-width': 3, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'});
+
+                map.on("viewreset", reset);
+                console.log("reset2");
+                reset();
+
+                // Reposition the SVG to cover the features.
+                function reset() {
+
+console.log("Reset metro");
+
+                  var bounds = path.bounds(collection),
+                      topLeft = bounds[0],
+                      bottomRight = bounds[1];
+
+                  svg .attr("width", bottomRight[0] - topLeft[0])
+                      .attr("height", bottomRight[1] - topLeft[1])
+                      .style("left", topLeft[0] + "px")
+                      .style("top", topLeft[1] + "px");
+
+                  g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+                  feature.attr("d", path);
+                }
+
+                // Use Leaflet to implement a D3 geometric transformation.
+                function projectPoint(x, y) {
+                  var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                  this.stream.point(point.x, point.y);
+                }
+              });
+
+
+      </script>
+  </body>
 </html>
