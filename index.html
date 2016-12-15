@@ -57,7 +57,7 @@
                 var duration = 10000;
 
 
-                var map = L.map('map').setView([45.750000, 4.850000], 14);
+                var map = L.map('map').setView([45.750000, 4.850000], 13);
 
                 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                   attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -78,11 +78,11 @@
                 map.on("viewreset", reset);
 
 
-                // Affichage des lignes de tram
+                /*
+                * Affichage des lignes de tram
+                */
                 d3.json("tram.json", function(error, collection) {
                   if (error) throw error;
-
-                console.log(collection.features);
 
                 var transform = d3.geo.transform({point: projectPoint});
                 var path = d3.geo.path().projection(transform);
@@ -91,12 +91,10 @@
                      .data(collection.features)
                      .enter().append("path")
                     .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                  .style({'stroke-width': 2, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                    .style({'stroke-width': 2, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
                     .style("stroke", function(d) {
                       var array = d.properties.couleur.split(" ");
                       var color = (d3.rgb(array[0], array[1], array[2])).toString();
-
-                      console.log(color);
                       return color ;
                     });
 
@@ -105,11 +103,11 @@
                 });
 
 
-                // Affichage des lignes de bus
+                /*
+                * Affichage des lignes de bus
+                */
                 d3.json("bus.json", function(error, collection) {
                   if (error) throw error;
-
-                console.log(collection.features);
 
                 var transform = d3.geo.transform({point: projectPoint});
                 var path = d3.geo.path().projection(transform);
@@ -122,8 +120,6 @@
                     .style("stroke", function(d) {
                       var array = d.properties.couleur.split(" ");
                       var color = (d3.rgb(array[0], array[1], array[2])).toString();
-
-                      console.log(color);
                       return color ;
                     });
 
@@ -142,7 +138,8 @@
                    var feature = g.selectAll("pathVelov")
                        .data(collection.features)
                        .enter().append("path")
-                       .style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
+                       //.style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
+                       .style("stroke", "black")
                        .style("fill", function(d) {
                          //console.log(d.properties.stationbonus);
                            var returnColor;
@@ -154,18 +151,19 @@
                           return returnColor;
                        })
                       //  .style("stroke-width", function(d) {
-                      //    console.log(d.properties.nbbornettes);
+                      //    //console.log(d.properties.nbbornettes);
                       //      var size;
                       //      if (d.properties.nbbornettes < 15) {
-                      //        size = 2;
+                      //        size = 1;
                       //    } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
-                      //      size = 4;
+                      //      size = 2;
                       //    } else {
-                      //      size = 6;
+                      //      size = 3;
                       //    }
                       //     return size;
                       //  })
                        .on('mousemove', function(d) {
+
                          var mouse = d3.mouse(svg.node()).map(function(d) {
                            return parseInt(d);
                          });
@@ -179,6 +177,7 @@
                              d3.select(this).style("stroke", "red");
                              d3.select(this).style("stroke-width", "15");
                              //d3.select(this).style("pointRadius", "10");
+
                        })
                        .on('mouseout', function() {
                          tooltip.classed('hidden', true);
@@ -203,221 +202,88 @@
                 var path = d3.geo.path().projection(transform);
 
                 var feature = g.selectAll("pathMetro")
-                   .data(collection.features)
-                   .enter().append("path")
+                  .data(collection.features)
+                  .enter().append("path")
+                  .attr("sens", function(d) {
+                    //console.log(d.properties.sens);
+                    return d.properties.sens;
+                  })
                   .style({'fill': '#B10000', 'fill-opacity': 0.0})
                   .style({'stroke-width': 5, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
                   .style("stroke", function(d) {
                     var array = d.properties.couleur.split(" ");
                     var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                    return color ;
+                    return color;
                   });
 
                 // map.on("viewreset", reset);
                 reset(path, collection, feature);
 
                 // Animation des points
-                var nodes = d3.selectAll('path');
-                var pathNode = d3.selectAll('path')[0][1];
+                var nodes = d3.selectAll('path')[0];
+                // console.log(nodes);
 
-                var node1 = d3.selectAll('path')[0][0];
-                var node2 = d3.selectAll('path')[0][1];
-                var node3 = d3.selectAll('path')[0][2];
-                var node4 = d3.selectAll('path')[0][3];
-                var node5 = d3.selectAll('path')[0][4];
-                var node6 = d3.selectAll('path')[0][5];
-                var node7 = d3.selectAll('path')[0][6];
-                var node8 = d3.selectAll('path')[0][7];
-                var node9 = d3.selectAll('path')[0][8];
-                var node10 = d3.selectAll('path')[0][9];
-                var node11 = d3.selectAll('path')[0][10];
-                var node12 = d3.selectAll('path')[0][11];
+                nodes.forEach(function(data, i){
 
-                console.log(d3.selectAll('path')[0]);
+                  (function repeat() {
 
-                var pathLength1 = node1.getTotalLength();
-                var pathLength2 = node2.getTotalLength();
-                var pathLength3 = node3.getTotalLength();
-                var pathLength4 = node4.getTotalLength();
-                var pathLength5 = node5.getTotalLength();
-                var pathLength6 = node6.getTotalLength();
-                var pathLength7 = node7.getTotalLength();
-                var pathLength8 = node8.getTotalLength();
-                var pathLength9 = node9.getTotalLength();
-                var pathLength10 = node10.getTotalLength();
-                var pathLength11 = node11.getTotalLength();
-                var pathLength12 = node12.getTotalLength();
+                    var pathLengthN = data.getTotalLength();
 
-                var circle1 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node1.style["stroke"])
-                    .attr("transform", getTransform (node1))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node1.getPointAtLength(pathLength1 - pathLength1*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
+                    var circleN = group.append("circle")
+                        .attr("r", 10)
+                        .attr("fill", data.style["stroke"])
+                        .attr("transform", getTransform (data))
+                        .attr('fill-opacity', 0.5)
+                        .transition()
+                        .duration(duration)
+                        .ease("linear")
+                        .each("end", repeat)
+                        .attrTween("transform", function (d, i) {
+                          return function (t) {
 
-                var circle2 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node2.style["stroke"])
-                    .attr("transform", getTransform (node2))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node2.getPointAtLength(pathLength2*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
+                            var p;
+                            if(d3.select(data).attr("sens") == "Aller")
+                              p = data.getPointAtLength(pathLengthN*t);
+                            else
+                              p = data.getPointAtLength(pathLengthN - pathLengthN*t);
 
-                var circle3 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node3.style["stroke"])
-                    .attr("transform", getTransform (node3))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node3.getPointAtLength(pathLength3 - pathLength3*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle4 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node4.style["stroke"])
-                    .attr("transform", getTransform (node4))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node4.getPointAtLength(pathLength4*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle5 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node5.style["stroke"])
-                    .attr("transform", getTransform (node5))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node5.getPointAtLength(pathLength5 - pathLength5*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle6 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node6.style["stroke"])
-                    .attr("transform", getTransform (node6))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node6.getPointAtLength(pathLength6*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle7 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node7.style["stroke"])
-                    .attr("transform", getTransform (node7))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node7.getPointAtLength(pathLength7 - pathLength7*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle8 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node8.style["stroke"])
-                    .attr("transform", getTransform (node8))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node8.getPointAtLength(pathLength8*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
-
-                var circle9 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node9.style["stroke"])
-                    .attr("transform", getTransform (node9))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node9.getPointAtLength(pathLength9 - pathLength9*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
+                            return "translate(" + [p.x, p.y] + ")";
+                          }
+                        });
+                  })();
                 });
 
 
-                var circle10 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node10.style["stroke"])
-                    .attr("transform", getTransform (node10))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node10.getPointAtLength(pathLength10*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
 
-                var circle11 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node11.style["stroke"])
-                    .attr("transform", getTransform (node11))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node11.getPointAtLength(pathLength11 - pathLength11*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
 
-                var circle12 = group.append("circle")
-                    .attr("r", 10)
-                    .attr("fill", node12.style["stroke"])
-                    .attr("transform", getTransform (node12))
-                    .transition()
-                    .duration(duration)
-                    .ease("linear")
-                    .attrTween("transform", function (d, i) {
-                    return function (t) {
-                        var p = node12.getPointAtLength(pathLength12*t);
-                        return "translate(" + [p.x, p.y] + ")";
-                    }
-                });
+                // Animation des points
+                //var nodes = d3.selectAll('path');
+                //var pathNode = d3.selectAll('path')[0][1];
 
-              });
+                // var node1 = d3.selectAll('path')[0][0];
+                //
+                // //console.log(d3.selectAll('path')[0]);
+                //
+                //
+                // var pathLength1 = node1.getTotalLength();
+                //
+                // var circle1 = group.append("circle")
+                //     .attr("r", 10)
+                //     .attr("fill", node1.style["stroke"])
+                //     .attr("transform", getTransform (node1))
+                //     .attr('fill-opacity', 0.5)
+                //     .transition()
+                //     .duration(duration)
+                //     .ease("linear")
+                //     .attrTween("transform", function (d, i) {
+                //       console.log(d);
+                //     return function (t) {
+                //         var p = node1.getPointAtLength(pathLength1 - pathLength1*t);
+                //         return "translate(" + [p.x, p.y] + ")";
+                //     }
+                // });
+
+               });
 
 
               // Reposition the SVG to cover the features.
