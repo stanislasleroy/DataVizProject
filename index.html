@@ -11,7 +11,6 @@
       </script>
     <style>
       body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
-
       #map {
         width: 100%;
         height: 100%;
@@ -28,7 +27,6 @@
           opacity: 0.9;
           position: absolute;
       }
-
     </style>
   </head>
 
@@ -42,7 +40,6 @@
       <!--<div id="map" style="width: 600px; height: 400px"></div>-->
 
       <script>
-
           //var map = L.map('map').setView([-41.2858, 174.7868], 13);
 /*
           mapLink =
@@ -53,11 +50,14 @@
               maxZoom: 18,
               }).addTo(map);
               */
-
               //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
                 // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
+                var vis;
 
-                var map = L.map('map').setView([45.750000, 4.850000], 13);
+                var duration = 10000;
+
+
+                var map = L.map('map').setView([45.750000, 4.850000], 14);
 
                 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                   attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -67,172 +67,382 @@
                 }).addTo(map);
 
 
+                var svg = d3.select(map.getPanes().overlayPane).append("svg");
 
-              var svg = d3.select(map.getPanes().overlayPane).append("svg"),
-                  g = svg.append("g").attr("class", "leaflet-zoom-hide");
+                var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+                var group = g.append("svg:g");
 
+                var tooltip = d3.select('body').append('div')
+                  .attr('class', 'hidden tooltip');
 
-                  var tooltip = d3.select('body').append('div')
-                  	.attr('class', 'hidden tooltip');
-
-
-
-
+                map.on("viewreset", reset);
 
 
+                // Affichage des lignes de tram
+                d3.json("tram.json", function(error, collection) {
+                  if (error) throw error;
 
-              // Affichage des stations Vélo'v
+                console.log(collection.features);
 
-              d3.json("stations.json", function(error, collection2) {
-                if (error) throw error;
+                var transform = d3.geo.transform({point: projectPoint});
+                var path = d3.geo.path().projection(transform);
 
-              var transform2 = d3.geo.transform({point: projectPoint2}),
-                    path2 = d3.geo.path().projection(transform2).pointRadius(4);
-
-                 var feature2 = g.selectAll("path")
-                     .data(collection2.features)
-                     .enter().append("path")
-                     .style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
-                     .style("fill", function(d) {
-
-                       //console.log(d.properties.stationbonus);
-
-                         var returnColor;
-
-                         if (d.properties.stationbonus === "Oui") {
-                           returnColor = "#FFBF00";
-                       } else {
-                         returnColor = "#d3d3d3";
-                       }
-                        return returnColor;
-                     })
-                     /*.style("stroke-width", function(d) {
-
-                       console.log(d.properties.nbbornettes);
-
-                         var size;
-
-                         if (d.properties.nbbornettes < 15) {
-                           size = 2;
-                       } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
-                         size = 4;
-                       } else {
-                         size = 6;
-                       }
-                        return size;
-                     })*/
-                     .on('mousemove', function(d) {
-
-                       var mouse = d3.mouse(svg.node()).map(function(d) {
-                         return parseInt(d);
-                       });
-
-                         //console.log(d);
-
-                          tooltip.classed('hidden', false)
-                           .attr('style', 'left:' + (mouse[0]) +
-                                 'px; top:' + (mouse[1]) + 'px')
-                           .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
-
-                           //d3.select(this).style("width", "10");
-                           //d3.select(this).style("fill", "pink");
-                           d3.select(this).style("stroke", "red");
-                           d3.select(this).style("stroke-width", "15");
-                           //d3.select(this).style("pointRadius", "10");
-                     })
-                     .on('mouseout', function() {
-                       tooltip.classed('hidden', true);
-                      // On remet l'opacité à 1
-                      d3.select(this).style("stroke", "black");
-                      d3.select(this).style("stroke-width", "2");
-
-                     });
-
-
-                map.on("viewreset", reset2);
-                console.log("reset1");
-                reset2();
-
-                // Reposition the SVG to cover the features.
-                function reset2() {
-                  var bounds2 = path2.bounds(collection2),
-                      topLeft2 = bounds2[0],
-                      bottomRight2 = bounds2[1];
-
-                  svg .attr("width", bottomRight2[0] - topLeft2[0])
-                      .attr("height", bottomRight2[1] - topLeft2[1])
-                      .style("left", topLeft2[0] + "px")
-                      .style("top", topLeft2[1] + "px");
-
-                  g.attr("transform", "translate(" + -topLeft2[0] + "," + -topLeft2[1] + ")");
-
-                  feature2.attr("d", path2);
-                }
-
-                // Use Leaflet to implement a D3 geometric transformation.
-                function projectPoint2(x, y) {
-                  var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-                  this.stream.point(point.x, point.y);2
-                }
-              });
-
-
-
-
-
-
-
-              // Affichage des stations de métro
-              d3.json("ligne_metro.json", function(error, collection) {
-                if (error) throw error;
-
-              var transform = d3.geo.transform({point: projectPoint}),
-                    path = d3.geo.path().projection(transform);
-
-                 var feature = g.selectAll("path")
+                  var feature = g.selectAll("pathTram")
                      .data(collection.features)
                      .enter().append("path")
                     .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                    .style({'stroke-width': 3, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                  .style({'stroke-width': 2, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
                     .style("stroke", function(d) {
-
                       var array = d.properties.couleur.split(" ");
-
                       var color = (d3.rgb(array[0], array[1], array[2])).toString();
+
+                      console.log(color);
                       return color ;
                     });
 
-                map.on("viewreset", reset);
-                console.log("reset2");
-                reset();
+                  // map.on("viewreset", reset);
+                  reset(path, collection, feature);
+                });
 
-                // Reposition the SVG to cover the features.
-                function reset() {
 
-                  console.log("Reset metro");
+                // Affichage des lignes de bus
+                d3.json("bus.json", function(error, collection) {
+                  if (error) throw error;
 
-                  var bounds = path.bounds(collection),
-                      topLeft = bounds[0],
-                      bottomRight = bounds[1];
+                console.log(collection.features);
 
-                  svg .attr("width", bottomRight[0] - topLeft[0])
-                      .attr("height", bottomRight[1] - topLeft[1])
-                      .style("left", topLeft[0] + "px")
-                      .style("top", topLeft[1] + "px");
+                var transform = d3.geo.transform({point: projectPoint});
+                var path = d3.geo.path().projection(transform);
 
-                  g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+                  var feature = g.selectAll("pathBus")
+                     .data(collection.features)
+                     .enter().append("path")
+                    .style({'fill': '#B10000', 'fill-opacity': 0.0})
+                    //.style("stroke", "green")
+                    .style("stroke", function(d) {
+                      var array = d.properties.couleur.split(" ");
+                      var color = (d3.rgb(array[0], array[1], array[2])).toString();
 
-                  feature.attr("d", path);
-                }
+                      console.log(color);
+                      return color ;
+                    });
 
-                // Use Leaflet to implement a D3 geometric transformation.
-                function projectPoint(x, y) {
-                  var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-                  this.stream.point(point.x, point.y);
-                }
+                  // map.on("viewreset", reset);
+                  reset(path, collection, feature);
+                });
+
+
+                // Affichage des stations Vélo'v
+                d3.json("stations.json", function(error, collection) {
+                  if (error) throw error;
+
+                var transform = d3.geo.transform({point: projectPoint});
+                var path = d3.geo.path().projection(transform).pointRadius(4);
+
+                   var feature = g.selectAll("pathVelov")
+                       .data(collection.features)
+                       .enter().append("path")
+                       .style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
+                       .style("fill", function(d) {
+                         //console.log(d.properties.stationbonus);
+                           var returnColor;
+                           if (d.properties.stationbonus === "Oui") {
+                             returnColor = "#FFBF00";
+                         } else {
+                           returnColor = "#d3d3d3";
+                         }
+                          return returnColor;
+                       })
+                      //  .style("stroke-width", function(d) {
+                      //    console.log(d.properties.nbbornettes);
+                      //      var size;
+                      //      if (d.properties.nbbornettes < 15) {
+                      //        size = 2;
+                      //    } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
+                      //      size = 4;
+                      //    } else {
+                      //      size = 6;
+                      //    }
+                      //     return size;
+                      //  })
+                       .on('mousemove', function(d) {
+                         var mouse = d3.mouse(svg.node()).map(function(d) {
+                           return parseInt(d);
+                         });
+                           //console.log(d);
+                            tooltip.classed('hidden', false)
+                             .attr('style', 'left:' + (mouse[0]) +
+                                   'px; top:' + (mouse[1]) + 'px')
+                             .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
+                             //d3.select(this).style("width", "10");
+                             //d3.select(this).style("fill", "pink");
+                             d3.select(this).style("stroke", "red");
+                             d3.select(this).style("stroke-width", "15");
+                             //d3.select(this).style("pointRadius", "10");
+                       })
+                       .on('mouseout', function() {
+                         tooltip.classed('hidden', true);
+                        // On remet l'opacité à 1
+                        d3.select(this).style("stroke", "black");
+                        d3.select(this).style("stroke-width", "2");
+                       });
+
+                  map.on("viewreset", reset);
+                  reset(path, collection, feature);
+                });
+
+
+
+
+
+                // Affichage des stations de métro
+                d3.json("ligne_metro.json", function(error, collection) {
+                  if (error) throw error;
+
+                var transform = d3.geo.transform({point: projectPoint});
+                var path = d3.geo.path().projection(transform);
+
+                var feature = g.selectAll("pathMetro")
+                   .data(collection.features)
+                   .enter().append("path")
+                  .style({'fill': '#B10000', 'fill-opacity': 0.0})
+                  .style({'stroke-width': 5, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                  .style("stroke", function(d) {
+                    var array = d.properties.couleur.split(" ");
+                    var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                    return color ;
+                  });
+
+                // map.on("viewreset", reset);
+                reset(path, collection, feature);
+
+                // Animation des points
+                var nodes = d3.selectAll('path');
+                var pathNode = d3.selectAll('path')[0][1];
+
+                var node1 = d3.selectAll('path')[0][0];
+                var node2 = d3.selectAll('path')[0][1];
+                var node3 = d3.selectAll('path')[0][2];
+                var node4 = d3.selectAll('path')[0][3];
+                var node5 = d3.selectAll('path')[0][4];
+                var node6 = d3.selectAll('path')[0][5];
+                var node7 = d3.selectAll('path')[0][6];
+                var node8 = d3.selectAll('path')[0][7];
+                var node9 = d3.selectAll('path')[0][8];
+                var node10 = d3.selectAll('path')[0][9];
+                var node11 = d3.selectAll('path')[0][10];
+                var node12 = d3.selectAll('path')[0][11];
+
+                console.log(d3.selectAll('path')[0]);
+
+                var pathLength1 = node1.getTotalLength();
+                var pathLength2 = node2.getTotalLength();
+                var pathLength3 = node3.getTotalLength();
+                var pathLength4 = node4.getTotalLength();
+                var pathLength5 = node5.getTotalLength();
+                var pathLength6 = node6.getTotalLength();
+                var pathLength7 = node7.getTotalLength();
+                var pathLength8 = node8.getTotalLength();
+                var pathLength9 = node9.getTotalLength();
+                var pathLength10 = node10.getTotalLength();
+                var pathLength11 = node11.getTotalLength();
+                var pathLength12 = node12.getTotalLength();
+
+                var circle1 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node1.style["stroke"])
+                    .attr("transform", getTransform (node1))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node1.getPointAtLength(pathLength1 - pathLength1*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle2 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node2.style["stroke"])
+                    .attr("transform", getTransform (node2))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node2.getPointAtLength(pathLength2*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle3 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node3.style["stroke"])
+                    .attr("transform", getTransform (node3))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node3.getPointAtLength(pathLength3 - pathLength3*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle4 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node4.style["stroke"])
+                    .attr("transform", getTransform (node4))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node4.getPointAtLength(pathLength4*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle5 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node5.style["stroke"])
+                    .attr("transform", getTransform (node5))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node5.getPointAtLength(pathLength5 - pathLength5*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle6 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node6.style["stroke"])
+                    .attr("transform", getTransform (node6))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node6.getPointAtLength(pathLength6*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle7 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node7.style["stroke"])
+                    .attr("transform", getTransform (node7))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node7.getPointAtLength(pathLength7 - pathLength7*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle8 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node8.style["stroke"])
+                    .attr("transform", getTransform (node8))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node8.getPointAtLength(pathLength8*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle9 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node9.style["stroke"])
+                    .attr("transform", getTransform (node9))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node9.getPointAtLength(pathLength9 - pathLength9*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+
+                var circle10 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node10.style["stroke"])
+                    .attr("transform", getTransform (node10))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node10.getPointAtLength(pathLength10*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle11 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node11.style["stroke"])
+                    .attr("transform", getTransform (node11))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node11.getPointAtLength(pathLength11 - pathLength11*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
+                var circle12 = group.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", node12.style["stroke"])
+                    .attr("transform", getTransform (node12))
+                    .transition()
+                    .duration(duration)
+                    .ease("linear")
+                    .attrTween("transform", function (d, i) {
+                    return function (t) {
+                        var p = node12.getPointAtLength(pathLength12*t);
+                        return "translate(" + [p.x, p.y] + ")";
+                    }
+                });
+
               });
 
 
+              // Reposition the SVG to cover the features.
+              function reset(inputPath, collection, feature) {
+                var bounds = inputPath.bounds(collection),
+                    topLeft = bounds[0],
+                    bottomRight = bounds[1];
+                svg .attr("width", bottomRight[0] - topLeft[0])
+                    .attr("height", bottomRight[1] - topLeft[1])
+                    .style("left", topLeft[0] + "px")
+                    .style("top", topLeft[1] + "px");
+                g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+                feature.attr("d", inputPath);
+              }
+
+              function getTransform(node) {
+                  var p = node.getPointAtLength(0)
+                  return "translate(" + [p.x, p.y] + ")";
+              }
+
+              // Use Leaflet to implement a D3 geometric transformation.
+              function projectPoint(x, y) {
+                var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                this.stream.point(point.x, point.y);
+              }
       </script>
   </body>
 </html>
