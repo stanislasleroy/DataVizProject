@@ -28,6 +28,9 @@
             opacity: 0.9;
             position: absolute;
         }
+        .hiddenLine {
+          display: none;
+        }
       </style>
     </head>
 
@@ -53,17 +56,22 @@
                 */
                 //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
                   // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
-                  var vis;
 
                   var initialZoom = 13;
-                  var duration = 10000;
 
+                  // Temps de trajet théorique des différents lignes (ms)
                   var durationA = 1260000;    // 21 minutes
                   var durationB = 1020000;    // 17 minutes
                   var durationC = 540000;     // 9 minutes
                   var durationD = 1500000;    // 25 minutes
+                  var duration = 10000;
 
-                  var divider  = 1000;
+                  // var divider  = 1000;
+                  var divider  = 100;
+
+                  // Distance pour prendre en compte les stations Vélov voisine
+                  // des stations de métro
+                  var distanceToStation = 200;
 
                   var details_line = {};
                   var selectedLine = "";
@@ -80,11 +88,14 @@
                   map.on('click', function(d) {
                     // console.log(d);
                     var e = d.originalEvent.path[0];
-                    console.log(e);
+                    // console.log(e);
 
                     if(!d3.select(e).attr("class")){
                       // console.log(d3.select(e).attr("class"));
                       selectedLine  = "";
+                      d3.selectAll('.train').each(function(d, i) {
+                        d3.select(this).classed("hiddenLine", false);
+                     });
                     }
 
 
@@ -242,7 +253,7 @@
                       /*
                       * Affichage des stations Métro
                       */
-                        console.log(JSON.stringify(stationsMetro.features[0]));
+                        // console.log(JSON.stringify(stationsMetro.features[0]));
                       // console.log(stationsMetro.features[0]);
 
                       // stationsMetro.features = stationsMetro.features.filter(function(d) {
@@ -257,9 +268,9 @@
                       //     }
                       // });
 
-                      console.log(JSON.stringify(stationsMetro.features[0]));
+                      // console.log(JSON.stringify(stationsMetro.features[0]));
                       // console.log(stationsMetro.features[0]);
-                      console.log(stationsMetro.features.length);
+                      // console.log(stationsMetro.features.length);
 
                       var feature = g.selectAll("path")
                           .data(stationsMetro.features)
@@ -324,9 +335,20 @@
                                d3.select(this).style("stroke-width", 8);
                             })
                             .on('click', function(d) {
-                               console.log(d);
+
+                              //  console.log(d);
                                d3.select(this).style("stroke-width", 8);
                                selectedLine = d.properties.code_titan.substring(0, 3);
+                              //  console.log(d3.selectAll('.train').filter(".t" + selectedLine));
+
+                              d3.selectAll('.train').each(function(d, i) {
+                              //  console.log(d);
+                                d3.select(this).classed("hiddenLine", true);
+                              });
+
+                              d3.selectAll('.train').filter(".t" + selectedLine).each(function(d, i) {
+                               d3.select(this).classed("hiddenLine", false);
+                              });
                             })
                             .on('mouseout', function() {
                               d3.select(this).style("stroke-width", 4);
@@ -346,7 +368,7 @@
                             (function repeat() {
 
                               // if(selectedLine == "") {
-                                // console.log(selectedLine + " is selected");
+                                // console.log(selectedLine);
 
                                 // if(d3.select(data).attr("code_titan") == selectedLine){
 
@@ -357,20 +379,17 @@
                                       .attr("r", 10)
                                       .attr("fill", data.style["stroke"])
                                       .attr("transform", getTransform (data))
-                                      // .attr('fill-opacity', 0.5)
-                                      .attr('fill-opacity', function(d){
-
-                                        if(selectedLine == "" )
-                                          return 0.5;
-                                        if(selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)
-                                          return 0.5;
-                                        else {
-                                          actived = false;
-                                          return 0.0;
-                                        }
-
-                                      })
+                                      .attr('fill-opacity', 0.5)
                                       .classed("train", true)
+                                      .classed("hiddenLine", function(d){
+                                        if(selectedLine == "")
+                                          return false;
+                                        else if(d3.select(data).attr("code_titan") == selectedLine)
+                                          return false;
+                                        else
+                                          return true;
+                                      })
+                                      .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
                                       .transition()
                                       .duration(function () {
                                         if(d3.select(data).attr("ligne") == "A")
@@ -425,8 +444,9 @@
 
                                                 var d = getDistance(c.lat, coord.lat, c.lng, coord.lng);
 
-                                                if(d < 200 ) {
-                                                  if(actived)
+                                                if(d < distanceToStation ) {
+                                                  // if(actived)
+                                                  if(selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine))
                                                     d3.select(stationsVelo[0][s]).style("stroke-width", "10");
                                                 } else {
                                                   d3.select(stationsVelo[0][s]).style("stroke-width", "2");
