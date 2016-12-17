@@ -1,806 +1,504 @@
-<html>
-  <head>
-    <meta charset="utf-8">
-    <link
-          rel="stylesheet"
-          href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"
-      />
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script
-          src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js">
-      </script>
-    <style>
-      body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
-      #map {
-        width: 100%;
-        height: 100%;
-      }
-      .hidden {
-          display: none;
-      }
-      div.tooltip {
-          color: #222;
-          background-color: #fff;
-          padding: .5em;
-          text-shadow: #f5f5f5 0 1px 0;
-          border-radius: 2px;
-          opacity: 0.9;
-          position: absolute;
-      }
-    </style>
-  </head>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <link
+            rel="stylesheet"
+            href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"
+        />
+      <script src="http://d3js.org/d3.v3.min.js"></script>
+      <script src="https://d3js.org/d3-queue.v3.min.js"></script>
+      <script
+            src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js">
+        </script>
+      <style>
+        body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+        #map {
+          width: 100%;
+          height: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+        div.tooltip {
+            color: #222;
+            background-color: #fff;
+            padding: .5em;
+            text-shadow: #f5f5f5 0 1px 0;
+            border-radius: 2px;
+            opacity: 0.9;
+            position: absolute;
+        }
+      </style>
+    </head>
 
-  <body>
-    <div>
-      <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-      <span id="week">heure</span>
-    </div>
-      <div id="map">
+    <body>
+      <div>
+        <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+        <span id="week">heure</span>
+      </div>
+        <div id="map">
 
-      <!--<div id="map" style="width: 600px; height: 400px"></div>-->
+        <!--<div id="map" style="width: 600px; height: 400px"></div>-->
 
-      <script>
-          //var map = L.map('map').setView([-41.2858, 174.7868], 13);
-/*
-          mapLink =
-              '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-          L.tileLayer(
-              'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '&copy; ' + mapLink + ' Contributors',
-              maxZoom: 18,
-              }).addTo(map);
-              */
-              //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
-                // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
-                var vis;
-
-                var duration = 10000;
-
-                var durationA = 1260000;    // 21 minutes
-                var durationB = 1020000;    // 17 minutes
-                var durationC = 540000;     // 9 minutes
-                var durationD = 1500000;    // 25 minutes
-
-                var code_titan = {};
-                var details_line = {};
-
-
-                var map = L.map('map').setView([45.750000, 4.850000], 14);
-
-                L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-                  maxZoom: 18,
-                  id: 'stanislasleroy.293gad2b',
-                  accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
+        <script>
+            //var map = L.map('map').setView([-41.2858, 174.7868], 13);
+  /*
+            mapLink =
+                '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+            L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; ' + mapLink + ' Contributors',
+                maxZoom: 18,
                 }).addTo(map);
-
-
-                var svg = d3.select(map.getPanes().overlayPane).append("svg");
-
-                var g = svg.append("g").attr("class", "leaflet-zoom-hide");
-                var group = g.append("svg:g");
-
-                var tooltip = d3.select('body').append('div')
-                  .attr('class', 'hidden tooltip');
-
-                map.on("viewreset", reset);
-
-
-
-
-
-                /*
-                * Affichage des stations Vélo'v
                 */
-                d3.json("stations.json", function(error, collection) {
-                  if (error) throw error;
+                //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
+                  // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
+                  var vis;
 
-                var transform = d3.geo.transform({point: projectPoint});
-                var path = d3.geo.path().projection(transform).pointRadius(4);
+                  var initialZoom = 13;
+                  var duration = 10000;
 
-                   var feature = g.selectAll("pathVelov")
-                       .data(collection.features)
-                       .enter().append("path")
-                       //.style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
-                       .style("stroke", "black")
-                       .style("fill", function(d) {
-                         //console.log(d.properties.stationbonus);
-                           var returnColor;
-                           if (d.properties.stationbonus === "Oui") {
-                             returnColor = "#FFBF00";
-                         } else {
-                           returnColor = "#d3d3d3";
-                         }
-                          return returnColor;
-                       })
-                      //  .style("stroke-width", function(d) {
-                      //    //console.log(d.properties.nbbornettes);
-                      //      var size;
-                      //      if (d.properties.nbbornettes < 15) {
-                      //        size = 1;
-                      //    } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
-                      //      size = 2;
-                      //    } else {
-                      //      size = 3;
-                      //    }
-                      //     return size;
-                      //  })
-                       .on('mousemove', function(d) {
+                  var durationA = 1260000;    // 21 minutes
+                  var durationB = 1020000;    // 17 minutes
+                  var durationC = 540000;     // 9 minutes
+                  var durationD = 1500000;    // 25 minutes
 
-                         var mouse = d3.mouse(svg.node()).map(function(d) {
-                           return parseInt(d);
-                         });
-                           //console.log(d);
-                            tooltip.classed('hidden', false)
-                             .attr('style', 'left:' + (mouse[0]) +
-                                   'px; top:' + (mouse[1]) + 'px')
-                             .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
-                             //d3.select(this).style("width", "10");
-                             //d3.select(this).style("fill", "pink");
-                             d3.select(this).style("stroke", "red");
-                             d3.select(this).style("stroke-width", "15");
-                             //d3.select(this).style("pointRadius", "10");
+                  var divider  = 1000;
 
-                       })
-                       .on('mouseout', function() {
-                         tooltip.classed('hidden', true);
-                        // On remet l'opacité à 1
-                        d3.select(this).style("stroke", "black");
-                        d3.select(this).style("stroke-width", "2");
-                       });
+                  var details_line = {};
+                  var selectedLine = "";
+
+                  var map = L.map('map').setView([45.750000, 4.850000], initialZoom);
+
+                  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'stanislasleroy.293gad2b',
+                    accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
+                  }).addTo(map);
+
+                  map.on('click', function(d) {
+                    // console.log(d);
+                    var e = d.originalEvent.path[0];
+                    console.log(e);
+
+                    if(!d3.select(e).attr("class")){
+                      // console.log(d3.select(e).attr("class"));
+                      selectedLine  = "";
+                    }
+
+
+                    // d3.select(this).style("stroke-width", 8);
+                    // selectedLine = d.properties.code_titan.substring(0, 3);
+                  })
+
+                  var transform = d3.geo.transform({point: projectPoint});
+                  var path = d3.geo.path().projection(transform);
+
+                  var svg = d3.select(map.getPanes().overlayPane).append("svg");
+
+                  var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+                  var tooltip = d3.select('body').append('div')
+                    .attr('class', 'hidden tooltip');
 
                   map.on("viewreset", reset);
-                  reset(path, collection, feature);
-                });
 
 
 
+                  // d3.queue()
+                  //   .defer(d3.json, "tram.json")
+                  //   .await(displaySecondaryLine);
+                  //
+                  // d3.queue()
+                  //   .defer(d3.json, "bus.json")
+                  //   .await(displaySecondaryLine);
 
-                /*
-                * Affichage des lignes de métro
-                */
-                d3.json("ligne_metro.json", function(error, collection) {
-                  if (error) throw error;
+                  // d3.queue()
+                  //   .defer(d3.json, "stations.json")
+                  //   .await(displayBikeStation);
 
-                  // console.log(collection.features);
-
-
-                  // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
-                  for (var i in collection.features) {
-                    var id = collection.features[i].properties.code_titan;
-                    id = id.substring(0, 3);
-                    code_titan[id] = id;
-                    details_line[id] = {};
-                    details_line[id].id = id;
-                    details_line[id].color = collection.features[i].properties.couleur;
-                  }
+                  d3.queue()
+                    .defer(d3.json, "point_arret.json")
+                    .defer(d3.json, "ligne_metro.json")
+                    .defer(d3.json, "stations.json")
+                    .await(displayPrimaryLine);
 
 
-                var transform = d3.geo.transform({point: projectPoint});
-                var path = d3.geo.path().projection(transform);
+                    /*
+                    * Création des lignes secondaires : tram et bus
+                    */
+                    function displaySecondaryLine(error, lines) {
 
-                var feature = g.selectAll("pathMetroLine")
-                  .data(collection.features)
-                  .enter().append("path")
-                  .attr("sens", function(d) {
-                    //console.log(d.properties.sens);
-                    return d.properties.sens;
-                  })
-                  .attr("ligne", function(d) {
-                    //console.log(d.properties.sens);
-                    return d.properties.ligne;
-                  })
-                  .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                  .style({'stroke-width': 5, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                  .style("stroke", function(d) {
-                    var array = d.properties.couleur.split(" ");
-                    var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                    return color;
-                  });
+                         var feature = g.selectAll("pathTram")
+                            .data(lines.features)
+                            .enter().append("path")
+                            .style({'fill': '#B10000', 'fill-opacity': 0.0})
+                            .style({'stroke-width': 1, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                            .style("stroke", function(d) {
+                              var array = d.properties.couleur.split(" ");
+                              var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                              return color ;
+                            });
 
-                // map.on("viewreset", reset);
-                reset(path, collection, feature);
+                         reset(path, lines, feature);
+                    }
 
-                // Animation des points
-                var nodes = d3.selectAll('path')[0];
-                // console.log(nodes);
 
-                nodes.forEach(function(data, i){
+                    /*
+                    * Affichage des stations Vélo'v
+                    */
+                    // function displayBikeStation(error, stations) {
+                    //
+                    //   var feature = g.selectAll("pathVelov")
+                    //       .data(stations.features)
+                    //       .enter().append("path")
+                    //       .classed("stationsVelo", true)
+                    //       .style("stroke", "black")
+                    //       .style("fill", function(d) { return d.properties.stationbonus === "Oui" ? "#FFBF00" : "#d3d3d3";})
+                    //       .on('mousemove', function(d) {
+                    //         var mouse = d3.mouse(svg.node()).map(function(d) {
+                    //           return parseInt(d);
+                    //         });
+                    //           //console.log(d);
+                    //            tooltip.classed('hidden', false)
+                    //             .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+                    //             .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
+                    //             d3.select(this).style("stroke", "red");
+                    //             d3.select(this).style("stroke-width", "15");
+                    //       })
+                    //       .on('mouseout', function() {
+                    //         tooltip.classed('hidden', true);
+                    //         d3.select(this).style("stroke", "black");
+                    //         d3.select(this).style("stroke-width", "2");
+                    //       });
+                    //
+                    //   reset(path, stations, feature);
+                    // }
 
-                  // console.log(data);
 
-                  (function repeat() {
+                    /*
+                    * Affichage des lignes de métro et des stations
+                    */
+                    function displayPrimaryLine(error, stationsMetro, lines, stationsVelo) {
 
-                    var pathLengthN = data.getTotalLength();
+                      /*
+                      * Affichage des stations Vélo'v
+                      */
+                      var feature = g.selectAll("pathVelov")
+                          .data(stationsVelo.features)
+                          .enter().append("path")
+                          .classed("stationsVelo", true)
+                          .style("stroke", "black")
+                          .style("fill", function(d) { return d.properties.stationbonus === "Oui" ? "#FFBF00" : "#d3d3d3";})
+                          .on('mousemove', function(d) {
+                            var mouse = d3.mouse(svg.node()).map(function(d) {
+                              return parseInt(d);
+                            });
+                              //console.log(d);
+                               tooltip.classed('hidden', false)
+                                .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+                                .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
+                                d3.select(this).style("stroke", "red");
+                                d3.select(this).style("stroke-width", "15");
+                          })
+                          .on('mouseout', function() {
+                            tooltip.classed('hidden', true);
+                            d3.select(this).style("stroke", "black");
+                            d3.select(this).style("stroke-width", "2");
+                          });
 
-                    var circleN = group.append("circle")
-                        .attr("r", 10)
-                        .attr("fill", data.style["stroke"])
-                        .attr("transform", getTransform (data))
-                        .attr('fill-opacity', 0.5)
-                        .transition()
-                        .duration(function () {
-                          if(d3.select(data).attr("ligne") == "A")
-                            return durationA/100;
-                          else if(d3.select(data).attr("ligne") == "B")
-                            return durationB/100;
-                          else if(d3.select(data).attr("ligne") == "C")
-                            return durationC/100;
-                          else if(d3.select(data).attr("ligne") == "D")
-                              return durationD/100;
-                          else
-                            return duration;
-                        })
-                        .ease("linear")
-                        .each("end", repeat)
-                        .attrTween("transform", function (d, i) {
-                          return function (t) {
-                            var p;
-                            if(d3.select(data).attr("sens") == "Aller")
-                              p = data.getPointAtLength(pathLengthN*t);
+                      reset(path, stationsVelo, feature);
+
+
+
+                      // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
+                      for (var i in lines.features) {
+                        var id = lines.features[i].properties.code_titan;
+                        id = id.substring(0, 3);
+                        details_line[id] = {};
+                        details_line[id].id = id;
+                        details_line[id].color = lines.features[i].properties.couleur;
+                      }
+
+                      // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
+                      for (var i in stationsMetro.features) {
+
+                        var id = stationsMetro.features[i].properties.desserte.substring(0, 3);
+
+                        if(details_line[id]){
+
+                          if(!details_line[id].stops)
+                            details_line[id].stops = [];
+
+                          var stop = {};
+                          stop.geo = {};
+                          stop.geo.x = stationsMetro.features[i].geometry.coordinates[0];
+                          stop.geo.y = stationsMetro.features[i].geometry.coordinates[1];
+                          details_line[id].stops.push(stop);
+                        }
+                      }
+
+                      /*
+                      * Affichage des stations Métro
+                      */
+                        console.log(JSON.stringify(stationsMetro.features[0]));
+                      // console.log(stationsMetro.features[0]);
+
+                      // stationsMetro.features = stationsMetro.features.filter(function(d) {
+                      //   var id = d.properties.desserte.substring(0, 3);
+                      //     if(details_line[id]){
+                      //       // console.log("true");
+                      //       return true;
+                      //     }
+                      //     else {
+                      //       // console.log("false");
+                      //       return false;
+                      //     }
+                      // });
+
+                      console.log(JSON.stringify(stationsMetro.features[0]));
+                      // console.log(stationsMetro.features[0]);
+                      console.log(stationsMetro.features.length);
+
+                      var feature = g.selectAll("path")
+                          .data(stationsMetro.features)
+                          .enter().append("path")
+                          .filter(function(d) {         // Filtrer les données pour ne garder que les arrêts des lignes de métro
+                            var id = d.properties.desserte.substring(0, 3);
+                            if(details_line[id])
+                              return true;
                             else
-                              p = data.getPointAtLength(pathLengthN - pathLengthN*t);
-                            return "translate(" + [p.x, p.y] + ")";
-                          }
-                        });
-                  })();
-                });
-
-
-
-                // Animation des points
-                //var nodes = d3.selectAll('path');
-                //var pathNode = d3.selectAll('path')[0][1];
-
-                // var node1 = d3.selectAll('path')[0][0];
-                //
-                // //console.log(d3.selectAll('path')[0]);
-                //
-                //
-                // var pathLength1 = node1.getTotalLength();
-                //
-                // var circle1 = group.append("circle")
-                //     .attr("r", 10)
-                //     .attr("fill", node1.style["stroke"])
-                //     .attr("transform", getTransform (node1))
-                //     .attr('fill-opacity', 0.5)
-                //     .transition()
-                //     .duration(duration)
-                //     .ease("linear")
-                //     .attrTween("transform", function (d, i) {
-                //       console.log(d);
-                //     return function (t) {
-                //         var p = node1.getPointAtLength(pathLength1 - pathLength1*t);
-                //         return "translate(" + [p.x, p.y] + ")";
-                //     }
-                // });
-
-               });
-
-
-
-               /*
-               * Affichage des stations de métro
-               */
-               d3.json("point_arret.json", function(error, collection) {
-                 if (error) throw error;
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform).pointRadius(4);
-
-                  var feature = g.selectAll("pathMetro")
-                      .data(collection.features)
-                      .enter().append("path")
-                      .filter(function(d) {         // Filtrer les données pour ne garder que les arrêts des lignes de métro
-                        var id = d.properties.desserte.substring(0, 3);
-                        if(code_titan[id])
-                          return true;
-                        else
-                          return false;
-                      })
-                      .style({'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                      .style("stroke", function(d) {
-                        var id = d.properties.desserte.substring(0, 3);
-
-                        var array = details_line[id].color.split(" ");
-                        var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                        return color;
-                      })
-                      .style("fill", function(d) {
-                        var id = d.properties.desserte.substring(0, 3);
-
-                        var array = details_line[id].color.split(" ");
-                        var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                        // console.log(color);
-                        return color;
-                      });
-
-                 map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-
-
-               /*
-               * Affichage des lignes de tram
-               */
-               d3.json("tram.json", function(error, collection) {
-                 if (error) throw error;
-
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform);
-
-                 var feature = g.selectAll("pathTram")
-                    .data(collection.features)
-                    .enter().append("path")
-                   .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                   .style({'stroke-width': 2, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                   .style("stroke", function(d) {
-                     var array = d.properties.couleur.split(" ");
-                     var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                     return color ;
-                   });
-
-                 // map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-               /*
-               * Affichage des lignes de bus
-               */
-               d3.json("bus.json", function(error, collection) {
-                 if (error) throw error;
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform);
-
-                 var feature = g.selectAll("pathBus")
-                    .data(collection.features)
-                    .enter().append("path")
-                   .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                   //.style("stroke", "green")
-                   .style("stroke", function(d) {
-                     var array = d.properties.couleur.split(" ");
-                     var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                     return color ;
-                   });
-
-                 // map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-
-
-              // Reposition the SVG to cover the features.
-              function reset(inputPath, collection, feature) {
-                var bounds = inputPath.bounds(collection),
-                    topLeft = bounds[0],
-                    bottomRight = bounds[1];
-                svg .attr("width", bottomRight[0] - topLeft[0])
-                    .attr("height", bottomRight[1] - topLeft[1])
-                    .style("left", topLeft[0] + "px")
-                    .style("top", topLeft[1] + "px");
-                g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-                feature.attr("d", inputPath);
-              }
-
-              function getTransform(node) {
-                  var p = node.getPointAtLength(0)
-                  return "translate(" + [p.x, p.y] + ")";
-              }
-
-              // Use Leaflet to implement a D3 geometric transformation.
-              function projectPoint(x, y) {
-                var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-                this.stream.point(point.x, point.y);
-              }
-      </script>
-  </body>
-</html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <link
-          rel="stylesheet"
-          href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"
-      />
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script
-          src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js">
-      </script>
-    <style>
-      body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
-      #map {
-        width: 100%;
-        height: 100%;
-      }
-      .hidden {
-          display: none;
-      }
-      div.tooltip {
-          color: #222;
-          background-color: #fff;
-          padding: .5em;
-          text-shadow: #f5f5f5 0 1px 0;
-          border-radius: 2px;
-          opacity: 0.9;
-          position: absolute;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div>
-      <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-      <span id="week">heure</span>
-    </div>
-      <div id="map">
-
-      <!--<div id="map" style="width: 600px; height: 400px"></div>-->
-
-      <script>
-          //var map = L.map('map').setView([-41.2858, 174.7868], 13);
-/*
-          mapLink =
-              '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-          L.tileLayer(
-              'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              attribution: '&copy; ' + mapLink + ' Contributors',
-              maxZoom: 18,
-              }).addTo(map);
-              */
-              //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
-                // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
-                var vis;
-
-                var duration = 10000;
-
-                var durationA = 1260000;    // 21 minutes
-                var durationB = 1020000;    // 17 minutes
-                var durationC = 540000;     // 9 minutes
-                var durationD = 1500000;    // 25 minutes
-
-                var code_titan = {};
-                var details_line = {};
-
-
-                var map = L.map('map').setView([45.750000, 4.850000], 14);
-
-                L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-                  maxZoom: 18,
-                  id: 'stanislasleroy.293gad2b',
-                  accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
-                }).addTo(map);
-
-
-                var svg = d3.select(map.getPanes().overlayPane).append("svg");
-
-                var g = svg.append("g").attr("class", "leaflet-zoom-hide");
-                var group = g.append("svg:g");
-
-                var tooltip = d3.select('body').append('div')
-                  .attr('class', 'hidden tooltip');
-
-                map.on("viewreset", reset);
-
-
-
-
-
-                /*
-                * Affichage des stations Vélo'v
-                */
-                d3.json("stations.json", function(error, collection) {
-                  if (error) throw error;
-
-                var transform = d3.geo.transform({point: projectPoint});
-                var path = d3.geo.path().projection(transform).pointRadius(4);
-
-                   var feature = g.selectAll("pathVelov")
-                       .data(collection.features)
-                       .enter().append("path")
-                       //.style({'stroke' : 'black', 'stroke-width': 2, 'stroke-linejoin': 'square'})
-                       .style("stroke", "black")
-                       .style("fill", function(d) {
-                         //console.log(d.properties.stationbonus);
-                           var returnColor;
-                           if (d.properties.stationbonus === "Oui") {
-                             returnColor = "#FFBF00";
-                         } else {
-                           returnColor = "#d3d3d3";
-                         }
-                          return returnColor;
-                       })
-                      //  .style("stroke-width", function(d) {
-                      //    //console.log(d.properties.nbbornettes);
-                      //      var size;
-                      //      if (d.properties.nbbornettes < 15) {
-                      //        size = 1;
-                      //    } else if(d.properties.nbbornettes < 20 && d.properties.nbbornettes > 15) {
-                      //      size = 2;
-                      //    } else {
-                      //      size = 3;
-                      //    }
-                      //     return size;
-                      //  })
-                       .on('mousemove', function(d) {
-
-                         var mouse = d3.mouse(svg.node()).map(function(d) {
-                           return parseInt(d);
-                         });
-                           //console.log(d);
-                            tooltip.classed('hidden', false)
-                             .attr('style', 'left:' + (mouse[0]) +
-                                   'px; top:' + (mouse[1]) + 'px')
-                             .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
-                             //d3.select(this).style("width", "10");
-                             //d3.select(this).style("fill", "pink");
-                             d3.select(this).style("stroke", "red");
-                             d3.select(this).style("stroke-width", "15");
-                             //d3.select(this).style("pointRadius", "10");
-
-                       })
-                       .on('mouseout', function() {
-                         tooltip.classed('hidden', true);
-                        // On remet l'opacité à 1
-                        d3.select(this).style("stroke", "black");
-                        d3.select(this).style("stroke-width", "2");
-                       });
-
-                  map.on("viewreset", reset);
-                  reset(path, collection, feature);
-                });
-
-
-
-
-                /*
-                * Affichage des lignes de métro
-                */
-                d3.json("ligne_metro.json", function(error, collection) {
-                  if (error) throw error;
-
-                  // console.log(collection.features);
-
-
-                  // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
-                  for (var i in collection.features) {
-                    var id = collection.features[i].properties.code_titan;
-                    id = id.substring(0, 3);
-                    code_titan[id] = id;
-                    details_line[id] = {};
-                    details_line[id].id = id;
-                    details_line[id].color = collection.features[i].properties.couleur;
-                  }
-
-
-                var transform = d3.geo.transform({point: projectPoint});
-                var path = d3.geo.path().projection(transform);
-
-                var feature = g.selectAll("pathMetroLine")
-                  .data(collection.features)
-                  .enter().append("path")
-                  .attr("sens", function(d) {
-                    //console.log(d.properties.sens);
-                    return d.properties.sens;
-                  })
-                  .attr("ligne", function(d) {
-                    //console.log(d.properties.sens);
-                    return d.properties.ligne;
-                  })
-                  .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                  .style({'stroke-width': 5, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                  .style("stroke", function(d) {
-                    var array = d.properties.couleur.split(" ");
-                    var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                    return color;
-                  });
-
-                // map.on("viewreset", reset);
-                reset(path, collection, feature);
-
-                // Animation des points
-                var nodes = d3.selectAll('path')[0];
-                // console.log(nodes);
-
-                nodes.forEach(function(data, i){
-
-                  // console.log(data);
-
-                  (function repeat() {
-
-                    var pathLengthN = data.getTotalLength();
-
-                    var circleN = group.append("circle")
-                        .attr("r", 10)
-                        .attr("fill", data.style["stroke"])
-                        .attr("transform", getTransform (data))
-                        .attr('fill-opacity', 0.5)
-                        .transition()
-                        .duration(function () {
-                          if(d3.select(data).attr("ligne") == "A")
-                            return durationA/100;
-                          else if(d3.select(data).attr("ligne") == "B")
-                            return durationB/100;
-                          else if(d3.select(data).attr("ligne") == "C")
-                            return durationC/100;
-                          else if(d3.select(data).attr("ligne") == "D")
-                              return durationD/100;
-                          else
-                            return duration;
-                        })
-                        .ease("linear")
-                        .each("end", repeat)
-                        .attrTween("transform", function (d, i) {
-                          return function (t) {
-                            var p;
-                            if(d3.select(data).attr("sens") == "Aller")
-                              p = data.getPointAtLength(pathLengthN*t);
-                            else
-                              p = data.getPointAtLength(pathLengthN - pathLengthN*t);
-                            return "translate(" + [p.x, p.y] + ")";
-                          }
-                        });
-                  })();
-                });
-
-
-
-                // Animation des points
-                //var nodes = d3.selectAll('path');
-                //var pathNode = d3.selectAll('path')[0][1];
-
-                // var node1 = d3.selectAll('path')[0][0];
-                //
-                // //console.log(d3.selectAll('path')[0]);
-                //
-                //
-                // var pathLength1 = node1.getTotalLength();
-                //
-                // var circle1 = group.append("circle")
-                //     .attr("r", 10)
-                //     .attr("fill", node1.style["stroke"])
-                //     .attr("transform", getTransform (node1))
-                //     .attr('fill-opacity', 0.5)
-                //     .transition()
-                //     .duration(duration)
-                //     .ease("linear")
-                //     .attrTween("transform", function (d, i) {
-                //       console.log(d);
-                //     return function (t) {
-                //         var p = node1.getPointAtLength(pathLength1 - pathLength1*t);
-                //         return "translate(" + [p.x, p.y] + ")";
-                //     }
-                // });
-
-               });
-
-
-
-               /*
-               * Affichage des stations de métro
-               */
-               d3.json("point_arret.json", function(error, collection) {
-                 if (error) throw error;
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform).pointRadius(4);
-
-                  var feature = g.selectAll("pathMetro")
-                      .data(collection.features)
-                      .enter().append("path")
-                      .filter(function(d) {         // Filtrer les données pour ne garder que les arrêts des lignes de métro
-                        var id = d.properties.desserte.substring(0, 3);
-                        if(code_titan[id])
-                          return true;
-                        else
-                          return false;
-                      })
-                      .style({'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                      .style("stroke", function(d) {
-                        var id = d.properties.desserte.substring(0, 3);
-
-                        var array = details_line[id].color.split(" ");
-                        var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                        return color;
-                      })
-                      .style("fill", function(d) {
-                        var id = d.properties.desserte.substring(0, 3);
-
-                        var array = details_line[id].color.split(" ");
-                        var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                        // console.log(color);
-                        return color;
-                      });
-
-                 map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-
-
-               /*
-               * Affichage des lignes de tram
-               */
-               d3.json("tram.json", function(error, collection) {
-                 if (error) throw error;
-
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform);
-
-                 var feature = g.selectAll("pathTram")
-                    .data(collection.features)
-                    .enter().append("path")
-                   .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                   .style({'stroke-width': 2, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
-                   .style("stroke", function(d) {
-                     var array = d.properties.couleur.split(" ");
-                     var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                     return color ;
-                   });
-
-                 // map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-               /*
-               * Affichage des lignes de bus
-               */
-               d3.json("bus.json", function(error, collection) {
-                 if (error) throw error;
-
-               var transform = d3.geo.transform({point: projectPoint});
-               var path = d3.geo.path().projection(transform);
-
-                 var feature = g.selectAll("pathBus")
-                    .data(collection.features)
-                    .enter().append("path")
-                   .style({'fill': '#B10000', 'fill-opacity': 0.0})
-                   //.style("stroke", "green")
-                   .style("stroke", function(d) {
-                     var array = d.properties.couleur.split(" ");
-                     var color = (d3.rgb(array[0], array[1], array[2])).toString();
-                     return color ;
-                   });
-
-                 // map.on("viewreset", reset);
-                 reset(path, collection, feature);
-               });
-
-
-
-
-              // Reposition the SVG to cover the features.
-              function reset(inputPath, collection, feature) {
-                var bounds = inputPath.bounds(collection),
-                    topLeft = bounds[0],
-                    bottomRight = bounds[1];
-                svg .attr("width", bottomRight[0] - topLeft[0])
-                    .attr("height", bottomRight[1] - topLeft[1])
-                    .style("left", topLeft[0] + "px")
-                    .style("top", topLeft[1] + "px");
-                g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-                feature.attr("d", inputPath);
-              }
-
-              function getTransform(node) {
-                  var p = node.getPointAtLength(0)
-                  return "translate(" + [p.x, p.y] + ")";
-              }
-
-              // Use Leaflet to implement a D3 geometric transformation.
-              function projectPoint(x, y) {
-                var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-                this.stream.point(point.x, point.y);
-              }
-      </script>
-  </body>
-</html>
+                              return false;
+                          })
+                          .classed("stationsMetro", true)
+                          .style({'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                          // .style("stroke-opacity", 0.5)
+                          .style("stroke", function(d) {
+                              // return "black";
+                            var id = d.properties.desserte.substring(0, 3);
+                            var array = details_line[id].color.split(" ");
+                            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                            return color;
+                          })
+                          .attr("id", function(d){return d.properties.id;})
+                          .style("fill", function(d) {
+                            // return "black";
+                            var id = d.properties.desserte.substring(0, 3);
+                            var array = details_line[id].color.split(" ");
+                            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                            return color;
+                          })
+                          ;
+
+                          reset(path, stationsMetro, feature);
+
+
+                          /*
+                          * Affichage des lignes de Métro
+                          */
+                          var feature = g.selectAll("pathMetroLine")
+                            .data(lines.features)
+                            .enter().append("path")
+                            .classed("lineMetro", true)
+                            .attr("sens", function(d) {
+                              //console.log(d.properties.sens);
+                              return d.properties.sens;
+                            })
+                            .attr("ligne", function(d) {
+                              //console.log(d.properties.sens);
+                              return d.properties.ligne;
+                            })
+                            .attr("code_titan", function(d) {
+                              //console.log(d.properties.sens);
+                              return d.properties.code_titan.substring(0, 3);
+                            })
+                            .style({'fill': '#B10000', 'fill-opacity': 0.0})
+                            .style({'stroke-width': 4, 'stroke': 'red', 'stroke-linejoin': 'round', 'stroke-linecap' : 'round'})
+                            .style("stroke", function(d) {
+                              var array = d.properties.couleur.split(" ");
+                              var color = (d3.rgb(array[0], array[1], array[2])).toString();
+                              return color;
+                            })
+                            .on('mousemove', function(d) {
+                               d3.select(this).style("stroke-width", 8);
+                            })
+                            .on('click', function(d) {
+                               console.log(d);
+                               d3.select(this).style("stroke-width", 8);
+                               selectedLine = d.properties.code_titan.substring(0, 3);
+                            })
+                            .on('mouseout', function() {
+                              d3.select(this).style("stroke-width", 4);
+                            });
+
+                          reset(path, lines, feature);
+
+
+
+                          /*
+                          * Animation des rames de métro
+                          */
+                          var nodes = d3.selectAll('.lineMetro')[0];
+
+                          nodes.forEach(function(data, i){
+
+                            (function repeat() {
+
+                              // if(selectedLine == "") {
+                                // console.log(selectedLine + " is selected");
+
+                                // if(d3.select(data).attr("code_titan") == selectedLine){
+
+                                  var pathLengthN = data.getTotalLength();
+                                  var actived = true;
+
+                                  var circleN = g.append("circle")
+                                      .attr("r", 10)
+                                      .attr("fill", data.style["stroke"])
+                                      .attr("transform", getTransform (data))
+                                      // .attr('fill-opacity', 0.5)
+                                      .attr('fill-opacity', function(d){
+
+                                        if(selectedLine == "" )
+                                          return 0.5;
+                                        if(selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)
+                                          return 0.5;
+                                        else {
+                                          actived = false;
+                                          return 0.0;
+                                        }
+
+                                      })
+                                      .classed("train", true)
+                                      .transition()
+                                      .duration(function () {
+                                        if(d3.select(data).attr("ligne") == "A")
+                                          return durationA/divider;
+                                        else if(d3.select(data).attr("ligne") == "B")
+                                          return durationB/divider;
+                                        else if(d3.select(data).attr("ligne") == "C")
+                                          return durationC/divider;
+                                        else if(d3.select(data).attr("ligne") == "D")
+                                            return durationD/divider;
+                                        else
+                                          return duration;
+                                      })
+                                      .ease("linear")
+                                      .each("end", repeat)
+                                      .remove()
+                                      .attrTween("transform", function (d, i) {
+                                        return function (t) {
+
+                                          var p;
+
+                                          if(d3.select(data).attr("sens") == "Aller")
+                                            p = data.getPointAtLength(pathLengthN*t);
+                                          else
+                                            p = data.getPointAtLength(pathLengthN - pathLengthN*t);
+
+                                           var point = L.point(p.x, p.y);
+                                           var coord = map.layerPointToLatLng(point);
+
+                                           var code_titan = d3.select(data).attr("code_titan");
+                                           var scale = 1;
+
+                                           if(t == 0 || t == 1)
+                                            scale = 0;
+
+                                           for(var key in details_line[code_titan]["stops"]) {
+
+                                            var value = details_line[code_titan]["stops"][key];
+
+                                            var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
+
+                                              if(dist < 50){
+                                                // scale = dist/6;
+                                                scale = 2;
+
+                                              var stationsVelo = g.selectAll(".stationsVelo");
+
+                                              for (var s = 0; s < stationsVelo[0].length; s++) {
+                                                var node = stationsVelo[0][s];
+                                                var point = L.point(node.getPointAtLength(0).x, node.getPointAtLength(0).y);
+                                                var c = map.layerPointToLatLng(point);
+
+                                                var d = getDistance(c.lat, coord.lat, c.lng, coord.lng);
+
+                                                if(d < 200 ) {
+                                                  if(actived)
+                                                    d3.select(stationsVelo[0][s]).style("stroke-width", "10");
+                                                } else {
+                                                  d3.select(stationsVelo[0][s]).style("stroke-width", "2");
+                                                }
+                                              }
+
+                                            }
+                                          }
+
+                                          return "translate(" + [p.x, p.y] + ")scale(" + scale + ")";
+                                        }
+                                      });
+
+                                  //   }
+                                  // }
+
+                            })();
+                          });
+                    }
+
+
+
+                 console.log("Fin du chargement des données");
+
+
+
+                // Reposition the SVG to cover the features.
+                function reset(inputPath, collection, feature) {
+
+                  var bounds = inputPath.bounds(collection),
+                      topLeft = bounds[0],
+                      bottomRight = bounds[1];
+
+                  svg .attr("width", bottomRight[0] - topLeft[0])
+                      .attr("height", bottomRight[1] - topLeft[1])
+                      .style("left", topLeft[0] + "px")
+                      .style("top", topLeft[1] + "px");
+
+                  g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+                  feature.attr("d", inputPath);
+                }
+
+                function getTransform(node) {
+                    var p = node.getPointAtLength(0)
+                    return "translate(" + [p.x, p.y] + ")";
+                }
+
+                // Use Leaflet to implement a D3 geometric transformation.
+                function projectPoint(x, y) {
+                  var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                  this.stream.point(point.x, point.y);
+                }
+
+                function getDistance(lat1, lat2, lon1, lon2){
+
+                  var earthRadius = 6371000; //meters
+
+                  var dLat = toRad(lat2 - lat1);
+                  var dLng = toRad(lon2 - lon1);
+
+                  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                             Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                             Math.sin(dLng/2) * Math.sin(dLng/2);
+
+                  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+                  return earthRadius * c;
+                }
+
+                function toRad(Value) {
+                    return Value * Math.PI / 180;
+                }
+        </script>
+    </body>
+  </html>
