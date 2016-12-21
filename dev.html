@@ -91,7 +91,10 @@
             var stop_times = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-            var map = L.map('map').setView([45.750000, 4.850000], initialZoom);
+            var current_day = "2016-12-20";
+
+            // var map = L.map('map').setView([45.750000, 4.850000], initialZoom);
+            var map = L.map('map').setView([45.766000, 4.865000], initialZoom);
 
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -254,29 +257,31 @@
 
                 var effective_stop_points;
 
-                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes301);
-                // loadStopPoints(stopTimes301, effective_stop_points);
-                // loadStopTimes(stopTimes301, effective_stop_points);
+                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes301);
+                loadStopPoints(stopTimes301, effective_stop_points);
+                loadStopTimes(stopTimes301, effective_stop_points);
 
-                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes302);
-                // loadStopPoints(stopTimes302, effective_stop_points);
-                // // loadStopTimes(stopTimes302);
+                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes302);
+                loadStopPoints(stopTimes302, effective_stop_points);
+                loadStopTimes(stopTimes302);
 
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes303);
                 loadStopPoints(stopTimes303, effective_stop_points);
                 loadStopTimes(stopTimes303);
 
-                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
-                // loadStopPoints(stopTimes304, effective_stop_points);
-                // // loadStopTimes(stopTimes304);
+                // console.log(JSON.stringify(stop_times));
 
-                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes325);
-                // loadStopPoints(stopTimes325, effective_stop_points);
-                // // loadStopTimes(stopTimes325);
+                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
+                loadStopPoints(stopTimes304, effective_stop_points);
+                loadStopTimes(stopTimes304);
 
-                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
-                // loadStopPoints(stopTimes326, effective_stop_points);
-                // // loadStopTimes(stopTimes326);
+                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes325);
+                loadStopPoints(stopTimes325, effective_stop_points);
+                loadStopTimes(stopTimes325);
+
+                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
+                loadStopPoints(stopTimes326, effective_stop_points);
+                loadStopTimes(stopTimes326);
 
 
                 var feature = g.selectAll("pathStationsMetro")
@@ -332,7 +337,7 @@
                         return d.properties.ligne;
                     })
                     .attr("code_titan", function(d) {
-                        // console.log(d.properties.code_titan.substring(0, 3));
+                        console.log("Code Titan : " + d.properties.code_titan.substring(0, 3));
                         return d.properties.code_titan.substring(0, 3);
                     })
                     .style({
@@ -380,104 +385,152 @@
 
                 nodes.forEach(function(data, i) {
 
-                    (function repeat() {
+                    var current_line = d3.select(data).attr("code_titan");
+                    console.log(d3.select(data).attr("code_titan"));
 
-                        // if(selectedLine == "") {
-                        // console.log(selectedLine);
+                    // var journeys = stop_times[current_line];
 
-                        // if(d3.select(data).attr("code_titan") == selectedLine){
+                    if (stop_times[current_line]) {
 
-                        var pathLengthN = data.getTotalLength();
-                        var actived = true;
+                        // console.log(stop_times[current_line]);
+                        var journeys = stop_times[current_line][current_day];
 
-                        var circleN = g.append("circle")
-                            .attr("r", 10)
-                            .attr("fill", data.style["stroke"])
-                            .attr("transform", getTransform(data))
-                            .attr('fill-opacity', 0.5)
-                            .classed("train", true)
-                            .classed("hiddenLine", function(d) {
-                                if (selectedLine == "")
-                                    return false;
-                                else if (d3.select(data).attr("code_titan") == selectedLine)
-                                    return false;
-                                else
-                                    return true;
-                            })
-                            .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
-                            .transition()
-                            .duration(function() {
-                                if (d3.select(data).attr("ligne") == "A")
-                                    return durationA / divider;
-                                else if (d3.select(data).attr("ligne") == "B")
-                                    return durationB / divider;
-                                else if (d3.select(data).attr("ligne") == "C")
-                                    return durationC / divider;
-                                else if (d3.select(data).attr("ligne") == "D")
-                                    return durationD / divider;
-                                else
-                                    return duration;
-                            })
-                            .ease("linear")
-                            .each("end", repeat)
-                            .remove()
-                            .attrTween("transform", function(d, i) {
-                                return function(t) {
+                        var index = 0;
 
-                                    var p;
+                        var interval = setInterval(function() {
 
-                                    if (d3.select(data).attr("sens") == "Aller")
-                                        p = data.getPointAtLength(pathLengthN * t);
+                            if (index >= Object.keys(journeys).length) {
+                                clearInterval(x);
+                                console.log("Arrêt des métros");
+                            }
+
+                            // for (var i = 0; i < Object.keys(journeys).length; i++) {
+
+                            // setTimeout(function() {
+
+                            // console.log(i);
+
+                            //     }
+                            // }
+                            // var journeys = stop_times[current_line][current_day];
+                            // console.log(journeys);
+                            // var index = 0;
+
+                            // Object.keys(journeys)[index];
+
+
+
+
+                            // (function repeat() {
+
+                            // if(selectedLine == "") {
+                            // console.log(selectedLine);
+
+                            // if(d3.select(data).attr("code_titan") == selectedLine){
+
+                            var pathLengthN = data.getTotalLength();
+                            var actived = true;
+
+                            var circleN = g.append("circle")
+                                .attr("r", 8)
+                                .attr("fill", data.style["stroke"])
+                                .attr("transform", getTransform(data))
+                                .attr('fill-opacity', 0.5)
+                                .classed("train", true)
+                                .classed("hiddenLine", function(d) {
+                                    if (selectedLine == "")
+                                        return false;
+                                    else if (d3.select(data).attr("code_titan") == selectedLine)
+                                        return false;
                                     else
-                                        p = data.getPointAtLength(pathLengthN - pathLengthN * t);
+                                        return true;
+                                })
+                                .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
+                                .transition()
+                                .duration(function() {
+                                    if (d3.select(data).attr("ligne") == "A")
+                                        return durationA / divider;
+                                    else if (d3.select(data).attr("ligne") == "B")
+                                        return durationB / divider;
+                                    else if (d3.select(data).attr("ligne") == "C")
+                                        return durationC / divider;
+                                    else if (d3.select(data).attr("ligne") == "D")
+                                        return durationD / divider;
+                                    else
+                                        return duration;
+                                })
+                                .ease("linear")
+                                // .each("end", repeat)
+                                .remove()
+                                .attrTween("transform", function(d, i) {
+                                    return function(t) {
 
-                                    var point = L.point(p.x, p.y);
-                                    var coord = map.layerPointToLatLng(point);
+                                        var p;
 
-                                    var code_titan = d3.select(data).attr("code_titan");
-                                    var scale = 1;
+                                        if (d3.select(data).attr("sens") == "Aller")
+                                            p = data.getPointAtLength(pathLengthN * t);
+                                        else
+                                            p = data.getPointAtLength(pathLengthN - pathLengthN * t);
 
-                                    if (t == 0 || t == 1)
-                                        scale = 0;
+                                        var point = L.point(p.x, p.y);
+                                        var coord = map.layerPointToLatLng(point);
 
-                                    for (var key in details_line[code_titan]["stops"]) {
+                                        var code_titan = d3.select(data).attr("code_titan");
+                                        var scale = 1;
 
-                                        var value = details_line[code_titan]["stops"][key];
+                                        if (t == 0 || t == 1)
+                                            scale = 0;
 
-                                        var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
+                                        for (var key in details_line[code_titan]["stops"]) {
 
-                                        if (dist < 50) {
-                                            // scale = dist/6;
-                                            scale = 2;
+                                            var value = details_line[code_titan]["stops"][key];
 
-                                            var stationsVelo = g.selectAll(".stationsVelo");
+                                            var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
 
-                                            for (var s = 0; s < stationsVelo[0].length; s++) {
-                                                var node = stationsVelo[0][s];
-                                                var point = L.point(node.getPointAtLength(0).x, node.getPointAtLength(0).y);
-                                                var c = map.layerPointToLatLng(point);
+                                            if (dist < 50) {
+                                                // scale = dist/6;
+                                                // scale = 1;
+                                                scale = 2 - (dist / 100);
 
-                                                var d = getDistance(c.lat, coord.lat, c.lng, coord.lng);
+                                                var stationsVelo = g.selectAll(".stationsVelo");
 
-                                                if (d < distanceToStation) {
-                                                    if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine))
-                                                        d3.select(stationsVelo[0][s]).style("stroke-width", "10");
-                                                } else {
-                                                    d3.select(stationsVelo[0][s]).style("stroke-width", "2");
+                                                for (var s = 0; s < stationsVelo[0].length; s++) {
+                                                    var node = stationsVelo[0][s];
+                                                    var point = L.point(node.getPointAtLength(0).x, node.getPointAtLength(0).y);
+                                                    var c = map.layerPointToLatLng(point);
+
+                                                    var d = getDistance(c.lat, coord.lat, c.lng, coord.lng);
+
+                                                    // if (d < distanceToStation) {
+                                                    //     if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine))
+                                                    //         d3.select(stationsVelo[0][s]).style("stroke-width", "10");
+                                                    // } else {
+                                                    //     d3.select(stationsVelo[0][s]).style("stroke-width", "2");
+                                                    // }
                                                 }
+
                                             }
-
                                         }
+
+                                        return "translate(" + [p.x, p.y] + ")scale(" + scale + ")";
                                     }
+                                });
 
-                                    return "translate(" + [p.x, p.y] + ")scale(" + scale + ")";
-                                }
-                            });
+                            //   }
+                            // }
 
-                        //   }
-                        // }
+                            // })();
+                            // }, 2000);
+                            // }
+                            index++;
 
-                    })();
+                        }, 1000);
+
+
+                    }
+
+
+
                 });
             }
 
@@ -546,8 +599,11 @@
 
                     for (var j = 0; j < journeyPattern[i].stopPointList.length; j++) {
 
-                        if (result.indexOf(journeyPattern[i].stopPointList[j]) === -1)
-                            result.push(journeyPattern[i].stopPointList[j]);
+                        if (result.indexOf(journeyPattern[i].stopPointList[j]) === -1) {
+                            var value = journeyPattern[i].stopPointList[j];
+                            var id = value.substring(value.lastIndexOf(":") + 1);
+                            result.push(id);
+                        }
                     }
                 }
                 // console.log(result);
@@ -597,7 +653,11 @@
 
                 for (var i = 0; i < points.length; i++) {
 
-                    if (effective_stop_points.indexOf(points[i].objectId) !== -1) {
+                    var id = points[i].objectId.substring(points[i].objectId.lastIndexOf(":") + 1);
+
+                    if (effective_stop_points.indexOf(id) !== -1) {
+
+                        // console.log(id);
 
                         var newFeature = {
                             "type": "Feature",
@@ -626,9 +686,13 @@
 
             function loadStopTimes(line, effective_stop_points) {
 
-                var current_line = line.ChouettePTNetwork.PTNetwork.lineId;
-                stop_times[current_line] = {};
+                console.log("loadStopTimes");
 
+                var current_line = line.ChouettePTNetwork.PTNetwork.lineId.substring(line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
+                current_line = current_line.substring(0, 3);
+
+                stop_times[current_line] = {};
+                console.log(current_line);
 
                 // Création d'un nouveau hash 
                 // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
@@ -654,10 +718,22 @@
                         for (var k = 0; k < timetables[i].vehicleJourneyId.length; k++) {
                             stop_times[current_line][current_date][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
                         }
+
+                        // stop_times[current_line][current_date].sort(function(a, b) {
+                        //     if (a[Object.keys(a)[0]] < b[Object.keys(b)[0]]) return -1;
+                        //     if (a[Object.keys(a)[0]] > b[Object.keys(b)[0]]) return 1;
+                        //     return 0;
+                        // });
+                        // var keysSorted = Object.keys(stop_times[current_line][current_date]).sort(function(a, b) {
+                        //     return stop_times[current_line][current_date][a[Object.keys(a)[0]]] - stop_times[current_line][current_date][b[Object.keys(a)[0]]];
+                        // })
                     }
+
                 }
 
                 // console.log(JSON.stringify(stop_times));
+                // console.log("End");
+                // console.log(Object.keys(stop_times[current_line]).length);
             }
 
 
@@ -685,6 +761,9 @@
             }
 
 
+            /*
+             * Formatage de la date de la forme YYYY-MM-DD
+             */
             function formatDate(date) {
                 var d = new Date(date),
                     month = '' + (d.getMonth() + 1),
@@ -716,7 +795,34 @@
 
                     for (var j = 0; j < journey.vehicleJourneyAtStop.length; j++) {
                         var stop = journey.vehicleJourneyAtStop[j];
-                        hash[journey.objectId][stop.stopPointId] = stop.arrivalTime;
+                        var id = stop.stopPointId.substring(stop.stopPointId.lastIndexOf(":") + 1);
+                        hash[journey.objectId][id] = stop.arrivalTime;
+                    }
+                }
+
+                return hash;
+            }
+
+            /*
+             *
+             */
+            function getExtremitiesOfJourney(line) {
+
+                var hash = {};
+
+                // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
+                var vehicle_journeys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
+
+                for (var i = 0; i < vehicle_journeys.length; i++) {
+
+                    var journey = vehicle_journeys[i];
+
+                    hash[journey.objectId] = {};
+
+                    for (var j = 0; j < journey.vehicleJourneyAtStop.length; j++) {
+                        var stop = journey.vehicleJourneyAtStop[j];
+                        var id = stop.stopPointId.substring(stop.stopPointId.lastIndexOf(":") + 1);
+                        hash[journey.objectId][id] = stop.arrivalTime;
                     }
                 }
 
