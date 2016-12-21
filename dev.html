@@ -88,6 +88,8 @@
             stop_points['type'] = 'FeatureCollection';
             stop_points['features'] = [];
 
+            var stop_times = {};
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
             var map = L.map('map').setView([45.750000, 4.850000], initialZoom);
 
@@ -252,29 +254,29 @@
 
                 var effective_stop_points;
 
-                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes301);
-                loadStopPoints(stopTimes301, effective_stop_points);
-                loadStopTimes(stopTimes301, effective_stop_points);
+                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes301);
+                // loadStopPoints(stopTimes301, effective_stop_points);
+                // loadStopTimes(stopTimes301, effective_stop_points);
 
-                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes302);
-                loadStopPoints(stopTimes302, effective_stop_points);
-                // loadStopTimes(stopTimes302);
+                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes302);
+                // loadStopPoints(stopTimes302, effective_stop_points);
+                // // loadStopTimes(stopTimes302);
 
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes303);
                 loadStopPoints(stopTimes303, effective_stop_points);
-                // loadStopTimes(stopTimes303);
+                loadStopTimes(stopTimes303);
 
-                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
-                loadStopPoints(stopTimes304, effective_stop_points);
-                // loadStopTimes(stopTimes304);
+                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
+                // loadStopPoints(stopTimes304, effective_stop_points);
+                // // loadStopTimes(stopTimes304);
 
-                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes325);
-                loadStopPoints(stopTimes325, effective_stop_points);
-                // loadStopTimes(stopTimes325);
+                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes325);
+                // loadStopPoints(stopTimes325, effective_stop_points);
+                // // loadStopTimes(stopTimes325);
 
-                effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
-                loadStopPoints(stopTimes326, effective_stop_points);
-                // loadStopTimes(stopTimes326);
+                // effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
+                // loadStopPoints(stopTimes326, effective_stop_points);
+                // // loadStopTimes(stopTimes326);
 
 
                 var feature = g.selectAll("pathStationsMetro")
@@ -330,7 +332,7 @@
                         return d.properties.ligne;
                     })
                     .attr("code_titan", function(d) {
-                        console.log(d.properties.code_titan.substring(0, 3));
+                        // console.log(d.properties.code_titan.substring(0, 3));
                         return d.properties.code_titan.substring(0, 3);
                     })
                     .style({
@@ -620,19 +622,105 @@
                 // console.log(JSON.stringify(stop_points));
             }
 
+
+
             function loadStopTimes(line, effective_stop_points) {
 
-                console.log(line.ChouettePTNetwork);
+                var current_line = line.ChouettePTNetwork.PTNetwork.lineId;
+                stop_times[current_line] = {};
 
-                var vehicleJourneys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
 
-                for (var i = 0; i < vehicleJourneys.length; i++) {
-                    console.log(vehicleJourneys[i]);
+                // Création d'un nouveau hash 
+                // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
+                var vehicle_journey = getListVehicleJourney(line);
+
+
+                // Récupération des calendriers
+                var timetables = line.ChouettePTNetwork.Timetable;
+
+                for (var i = 0; i < timetables.length; i++) {
+
+                    // Récupération des jours associés à la période de temps
+                    var calendar =
+                        getCalendars(timetables[i].period.startOfPeriod,
+                            timetables[i].period.endOfPeriod,
+                            timetables[i].dayType);
+
+                    // Affectation des vehicleJourneyId aux différents jours
+                    for (var j = 0; j < calendar.length; j++) {
+                        var current_date = calendar[j];
+                        stop_times[current_line][current_date] = {};
+
+                        for (var k = 0; k < timetables[i].vehicleJourneyId.length; k++) {
+                            stop_times[current_line][current_date][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
+                        }
+                    }
                 }
 
-                // var points = line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
+                // console.log(JSON.stringify(stop_times));
+            }
 
-                // console.log(JSON.stringify(stop_points));
+
+            /*
+             *
+             */
+            function getCalendars(periodStart, periodEnd, days_to_compare) {
+
+                var result = [];
+
+                for (var d = new Date(periodStart); d <= new Date(periodEnd); d.setDate(d.getDate() + 1)) {
+
+                    if (Array.isArray(days_to_compare)) {
+                        if (days_to_compare.indexOf(days[d.getDay()]) !== -1) {
+                            result.push(formatDate(d));
+                        }
+                    } else {
+                        if (days_to_compare === days[d.getDay()]) {
+                            result.push(formatDate(d));
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+
+            function formatDate(date) {
+                var d = new Date(date),
+                    month = '' + (d.getMonth() + 1),
+                    day = '' + d.getDate(),
+                    year = d.getFullYear();
+
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+
+                return [year, month, day].join('-');
+            }
+
+
+            /*
+             *
+             */
+            function getListVehicleJourney(line) {
+
+                var hash = {};
+
+                // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
+                var vehicle_journeys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
+
+                for (var i = 0; i < vehicle_journeys.length; i++) {
+
+                    var journey = vehicle_journeys[i];
+
+                    hash[journey.objectId] = {};
+
+                    for (var j = 0; j < journey.vehicleJourneyAtStop.length; j++) {
+                        var stop = journey.vehicleJourneyAtStop[j];
+                        hash[journey.objectId][stop.stopPointId] = stop.arrivalTime;
+                    }
+                }
+
+                return hash;
             }
         </script>
 </body>
