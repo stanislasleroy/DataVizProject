@@ -472,14 +472,10 @@
                                         else
                                             p = data.getPointAtLength(pathLengthN - pathLengthN * t);
 
-                                        var point = L.point(p.x, p.y);
-                                        var coord = map.layerPointToLatLng(point);
+                                        var coord = map.layerPointToLatLng(L.point(p.x, p.y));
 
                                         var code_titan = d3.select(data).attr("code_titan");
                                         var scale = 1;
-
-                                        if (t == 0 || t == 1)
-                                            scale = 0;
 
                                         for (var key in details_line[code_titan]["stops"]) {
 
@@ -487,14 +483,13 @@
 
                                             var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
 
-                                            if (dist < 50) {
-                                                // scale = dist/6;
-                                                // scale = 1;
-                                                scale = 2 - (dist / 100);
+                                            if (dist < 20) {
+                                                scale = 2 - (dist / 40);
 
                                                 var stationsVelo = g.selectAll(".stationsVelo");
 
                                                 for (var s = 0; s < stationsVelo[0].length; s++) {
+
                                                     var node = stationsVelo[0][s];
                                                     var point = L.point(node.getPointAtLength(0).x, node.getPointAtLength(0).y);
                                                     var c = map.layerPointToLatLng(point);
@@ -520,11 +515,10 @@
                             // }
 
                             // })();
-                            // }, 2000);
                             // }
                             index++;
 
-                        }, 1000);
+                        }, 3000);
 
 
                     }
