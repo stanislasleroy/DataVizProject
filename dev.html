@@ -132,10 +132,6 @@
 
 
             // d3.queue()
-            //     .defer(d3.json, "horaires/303.json")
-            //     .await(loadStopTimes);
-
-            // d3.queue()
             //   .defer(d3.json, "tram.json")
             //   .await(displaySecondaryLine);
             //
@@ -153,11 +149,7 @@
                 .defer(d3.json, "neptune/304.json")
                 .defer(d3.json, "neptune/325.json")
                 .defer(d3.json, "neptune/326.json")
-                // .defer(d3.xml, "horaires/326.xml")
                 .await(displayPrimaryLine);
-
-
-
 
 
             /*
@@ -261,20 +253,29 @@
                 var effective_stop_points;
 
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes301);
+                loadStopPoints(stopTimes301, effective_stop_points);
                 loadStopTimes(stopTimes301, effective_stop_points);
+
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes302);
-                loadStopTimes(stopTimes302, effective_stop_points);
+                loadStopPoints(stopTimes302, effective_stop_points);
+                // loadStopTimes(stopTimes302);
+
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes303);
-                loadStopTimes(stopTimes303, effective_stop_points);
+                loadStopPoints(stopTimes303, effective_stop_points);
+                // loadStopTimes(stopTimes303);
+
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
-                loadStopTimes(stopTimes304, effective_stop_points);
+                loadStopPoints(stopTimes304, effective_stop_points);
+                // loadStopTimes(stopTimes304);
+
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes325);
-                loadStopTimes(stopTimes325, effective_stop_points);
+                loadStopPoints(stopTimes325, effective_stop_points);
+                // loadStopTimes(stopTimes325);
+
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
-                loadStopTimes(stopTimes326, effective_stop_points);
+                loadStopPoints(stopTimes326, effective_stop_points);
+                // loadStopTimes(stopTimes326);
 
-
-                // console.log(stop_points);
 
                 var feature = g.selectAll("pathStationsMetro")
                     // .data(stationsMetro.features)
@@ -537,7 +538,6 @@
 
                 result = [];
 
-                // console.log(line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern);
                 var journeyPattern = line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern;
 
                 for (var i = 0; i < journeyPattern.length; i++) {
@@ -548,7 +548,7 @@
                             result.push(journeyPattern[i].stopPointList[j]);
                     }
                 }
-                console.log(result);
+                // console.log(result);
                 return result;
             }
 
@@ -589,7 +589,7 @@
             /*
              *
              */
-            function loadStopTimes(line, effective_stop_points) {
+            function loadStopPoints(line, effective_stop_points) {
 
                 var points = line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
 
@@ -617,7 +617,22 @@
                     }
                 }
 
-                console.log(JSON.stringify(stop_points));
+                // console.log(JSON.stringify(stop_points));
+            }
+
+            function loadStopTimes(line, effective_stop_points) {
+
+                console.log(line.ChouettePTNetwork);
+
+                var vehicleJourneys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
+
+                for (var i = 0; i < vehicleJourneys.length; i++) {
+                    console.log(vehicleJourneys[i]);
+                }
+
+                // var points = line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
+
+                // console.log(JSON.stringify(stop_points));
             }
         </script>
 </body>
