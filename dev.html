@@ -65,7 +65,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initialZoom = 14;
+            var initialZoom = 13;
 
             // Temps de trajet théorique des différents lignes (ms)
             var durationA = 1260000; // 21 minutes
@@ -87,6 +87,9 @@
             var stop_points = {};
             stop_points['type'] = 'FeatureCollection';
             stop_points['features'] = [];
+
+            var total_bike_stations = {};
+            var nearby_bike_stations = {};
 
             var stop_times = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -190,6 +193,9 @@
              */
             function displayPrimaryLine(error, stationsMetro, lines, stationsVelo, stopTimes301, stopTimes302, stopTimes303, stopTimes304, stopTimes325, stopTimes326) {
 
+
+                total_bike_stations = stationsVelo;
+
                 /*
                  * Affichage des stations Vélo'v
                  */
@@ -197,6 +203,9 @@
                     .data(stationsVelo.features)
                     .enter().append("path")
                     .classed("stationsVelo", true)
+                    .attr("id", function(d) {
+                        return "id_" + d.properties.idstation;
+                    })
                     .style("stroke", "black")
                     .style("fill", function(d) {
                         return d.properties.stationbonus === "Oui" ? "#FFBF00" : "#d3d3d3";
@@ -207,7 +216,7 @@
                         });
                         tooltip.classed('hidden', false)
                             .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
-                            .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
+                            .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus + "<br><br>Coordonnées : " + d.geometry.coordinates[0] + " " + d.geometry.coordinates[1]);
                         d3.select(this).style("stroke", "red");
                         // d3.select(this).style("stroke-width", "10");
                     })
@@ -269,8 +278,6 @@
                 loadStopPoints(stopTimes303, effective_stop_points);
                 loadStopTimes(stopTimes303);
 
-                // console.log(JSON.stringify(stop_times));
-
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes304);
                 loadStopPoints(stopTimes304, effective_stop_points);
                 loadStopTimes(stopTimes304);
@@ -282,6 +289,12 @@
                 effective_stop_points = getEffectiveStopPointsForJSON(stopTimes326);
                 loadStopPoints(stopTimes326, effective_stop_points);
                 loadStopTimes(stopTimes326);
+
+
+                getNearbyBikeStations();
+                // console.log(JSON.stringify(nearby_bike_stations));
+
+
 
 
                 var feature = g.selectAll("pathStationsMetro")
@@ -337,7 +350,7 @@
                         return d.properties.ligne;
                     })
                     .attr("code_titan", function(d) {
-                        console.log("Code Titan : " + d.properties.code_titan.substring(0, 3));
+                        // console.log("Code Titan : " + d.properties.code_titan.substring(0, 3));
                         return d.properties.code_titan.substring(0, 3);
                     })
                     .style({
@@ -385,8 +398,20 @@
 
                 nodes.forEach(function(data, i) {
 
+                    var nb_stations_rencontrees = 0;
+
+                    var nb_stations = [];
+
                     var current_line = d3.select(data).attr("code_titan");
-                    console.log(d3.select(data).attr("code_titan"));
+                    // console.log(d3.select(data).attr("code_titan"));
+
+                    // nb = 0;
+
+                    // if (d3.select(data).attr("code_titan") == "304" &&
+                    // if (d3.select(data).attr("code_titan") == "304") {
+                    // d3.select(data).attr("sens") == "Aller" && nb == 0) {
+                    // d3.select(data).attr("sens") == "Aller") {
+                    // nb++;
 
                     // var journeys = stop_times[current_line];
 
@@ -400,131 +425,127 @@
                         var interval = setInterval(function() {
 
                             if (index >= Object.keys(journeys).length) {
-                                clearInterval(x);
+                                // if (index > 0) {
+                                clearInterval(interval);
                                 console.log("Arrêt des métros");
-                            }
+                            } else {
 
-                            // for (var i = 0; i < Object.keys(journeys).length; i++) {
+                                // for (var i = 0; i < Object.keys(journeys).length; i++) {
 
-                            // setTimeout(function() {
+                                // setTimeout(function() {
 
-                            // console.log(i);
+                                // console.log(i);
 
-                            //     }
-                            // }
-                            // var journeys = stop_times[current_line][current_day];
-                            // console.log(journeys);
-                            // var index = 0;
+                                //     }
+                                // }
+                                // var journeys = stop_times[current_line][current_day];
+                                // console.log(journeys);
+                                // var index = 0;
 
-                            // Object.keys(journeys)[index];
-
-
+                                // Object.keys(journeys)[index];
 
 
-                            // (function repeat() {
 
-                            // if(selectedLine == "") {
-                            // console.log(selectedLine);
 
-                            // if(d3.select(data).attr("code_titan") == selectedLine){
+                                // (function repeat() {
 
-                            var pathLengthN = data.getTotalLength();
-                            var actived = true;
+                                // if(selectedLine == "") {
+                                // console.log(selectedLine);
 
-                            var circleN = g.append("circle")
-                                .attr("r", 8)
-                                .attr("fill", data.style["stroke"])
-                                .attr("transform", getTransform(data))
-                                .attr('fill-opacity', 0.5)
-                                .classed("train", true)
-                                .classed("hiddenLine", function(d) {
-                                    if (selectedLine == "")
-                                        return false;
-                                    else if (d3.select(data).attr("code_titan") == selectedLine)
-                                        return false;
-                                    else
-                                        return true;
-                                })
-                                .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
-                                .transition()
-                                .duration(function() {
-                                    if (d3.select(data).attr("ligne") == "A")
-                                        return durationA / divider;
-                                    else if (d3.select(data).attr("ligne") == "B")
-                                        return durationB / divider;
-                                    else if (d3.select(data).attr("ligne") == "C")
-                                        return durationC / divider;
-                                    else if (d3.select(data).attr("ligne") == "D")
-                                        return durationD / divider;
-                                    else
-                                        return duration;
-                                })
-                                .ease("linear")
-                                // .each("end", repeat)
-                                .remove()
-                                .attrTween("transform", function(d, i) {
-                                    return function(t) {
+                                // if(d3.select(data).attr("code_titan") == selectedLine){
 
-                                        var p;
+                                var pathLengthN = data.getTotalLength();
+                                var actived = true;
 
-                                        if (d3.select(data).attr("sens") == "Aller")
-                                            p = data.getPointAtLength(pathLengthN * t);
+                                var circleN = g.append("circle")
+                                    .attr("r", 8)
+                                    .attr("fill", data.style["stroke"])
+                                    .attr("transform", getTransform(data))
+                                    .attr('fill-opacity', 0.5)
+                                    .classed("train", true)
+                                    .classed("hiddenLine", function(d) {
+                                        if (selectedLine == "")
+                                            return false;
+                                        else if (d3.select(data).attr("code_titan") == selectedLine)
+                                            return false;
                                         else
-                                            p = data.getPointAtLength(pathLengthN - pathLengthN * t);
+                                            return true;
+                                    })
+                                    .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
+                                    .transition()
+                                    .duration(function() {
+                                        if (d3.select(data).attr("ligne") == "A")
+                                            return durationA / divider;
+                                        else if (d3.select(data).attr("ligne") == "B")
+                                            return durationB / divider;
+                                        else if (d3.select(data).attr("ligne") == "C")
+                                            return durationC / divider;
+                                        else if (d3.select(data).attr("ligne") == "D")
+                                            return durationD / divider;
+                                        else
+                                            return duration;
+                                    })
+                                    .ease("linear")
+                                    // .each("end", repeat)
+                                    .remove()
+                                    .attrTween("transform", function(d, i) {
+                                        return function(t) {
 
-                                        var coord = map.layerPointToLatLng(L.point(p.x, p.y));
+                                            var p;
 
-                                        var code_titan = d3.select(data).attr("code_titan");
-                                        var scale = 1;
+                                            if (d3.select(data).attr("sens") == "Aller")
+                                                p = data.getPointAtLength(pathLengthN * t);
+                                            else
+                                                p = data.getPointAtLength(pathLengthN - pathLengthN * t);
 
-                                        for (var key in details_line[code_titan]["stops"]) {
+                                            var coord = map.layerPointToLatLng(L.point(p.x, p.y));
 
-                                            var value = details_line[code_titan]["stops"][key];
+                                            var code_titan = d3.select(data).attr("code_titan");
+                                            var scale = 1;
 
-                                            var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
+                                            for (var key in details_line[code_titan]["stops"]) {
 
-                                            if (dist < 20) {
-                                                scale = 2 - (dist / 40);
+                                                var value = details_line[code_titan]["stops"][key];
 
-                                                var stationsVelo = g.selectAll(".stationsVelo");
+                                                var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
 
-                                                for (var s = 0; s < stationsVelo[0].length; s++) {
+                                                if (dist < 20) {
 
-                                                    var node = stationsVelo[0][s];
-                                                    var point = L.point(node.getPointAtLength(0).x, node.getPointAtLength(0).y);
-                                                    var c = map.layerPointToLatLng(point);
+                                                    scale = 2 - (dist / 40);
 
-                                                    var d = getDistance(c.lat, coord.lat, c.lng, coord.lng);
+                                                    for (var bike_station_id in nearby_bike_stations[code_titan]) {
 
-                                                    // if (d < distanceToStation) {
-                                                    //     if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine))
-                                                    //         d3.select(stationsVelo[0][s]).style("stroke-width", "10");
-                                                    // } else {
-                                                    //     d3.select(stationsVelo[0][s]).style("stroke-width", "2");
-                                                    // }
+                                                        var bike_station = nearby_bike_stations[code_titan][bike_station_id];
+
+                                                        var d = getDistance(bike_station.latitude, coord.lat, bike_station.longitude, coord.lng);
+
+                                                        if (d < distanceToStation) {
+
+                                                            if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine))
+                                                                d3.select("path#id_" + bike_station_id).style("stroke-width", "5")
+                                                                .transition()
+                                                                // .delay(1000)
+                                                                .duration(500)
+                                                                .style("stroke-width", "1");
+                                                        }
+                                                    }
                                                 }
-
                                             }
+
+                                            return "translate(" + [p.x, p.y] + ")scale(" + scale + ")";
                                         }
+                                    });
 
-                                        return "translate(" + [p.x, p.y] + ")scale(" + scale + ")";
-                                    }
-                                });
+                                //   }
+                                // }
 
-                            //   }
-                            // }
-
-                            // })();
-                            // }
-                            index++;
-
-                        }, 3000);
-
-
+                                // })();
+                                // }
+                                index++;
+                            }
+                        }, 2000);
                     }
-
-
-
+                    // }
                 });
             }
 
@@ -581,7 +602,7 @@
 
 
             /*
-             *
+             * Renvoie la liste des arrêts pour la ligne "line"
              */
             function getEffectiveStopPointsForJSON(line) {
 
@@ -604,44 +625,15 @@
                 return result;
             }
 
-            // function getEffectiveStopPointsForXML(line) {
-
-            //     result = [];
-
-            //     // console.log(line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern);
-            //     console.log(line);
-            //     // console.log(line.documentElement);
-            //     console.log(line.getElementsByTagName("ChouetteLineDescription")[0].getElementsByTagName("Line")[0].getElementsByTagName("lineEnd"));
-            //     var lineEnds = line.getElementsByTagName("ChouetteLineDescription")[0].getElementsByTagName("Line")[0].getElementsByTagName("lineEnd")
-            //         // var journeyPattern = line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern;
-            //         // var journeyPattern = line.getElementsByTagName("JourneyPattern");
-
-            //     for (var i = 0; i < lineEnds.length; i++) {
-            //         console.log(lineEnds[i].nodeValue);
-            //     }
-
-
-            //     // for (var i = 0; i < journeyPattern.length; i++) {
-            //     //     console.log(journeyPattern[i]);
-            //     //     for (var j = 0; j < journeyPattern[i].getElementsByTagName("stopPointList.length"); j++) {
-            //     //         var item = journeyPattern[i].getElementsByTagName("stopPointList.length")[j];
-
-            //     //         console.log(item);
-
-            //     //         if (result.indexOf(journeyPattern[i].stopPointList[j]) === -1)
-            //     //             result.push(journeyPattern[i].stopPointList[j]);
-            //     //     }
-            //     // }
-            //     console.log(result);
-            //     return result;
-            // }
-
-
 
             /*
-             *
+             * Ajoute les points d'arrêts pour la ligne "line" dans l'objet global "stop_points"
              */
             function loadStopPoints(line, effective_stop_points) {
+
+                var current_line = line.ChouettePTNetwork.PTNetwork.lineId.substring(line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
+                current_line = current_line.substring(0, 3);
+
 
                 var points = line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
 
@@ -651,14 +643,12 @@
 
                     if (effective_stop_points.indexOf(id) !== -1) {
 
-                        // console.log(id);
-
                         var newFeature = {
                             "type": "Feature",
                             "properties": {
                                 "id": points[i].objectId,
                                 "nom": points[i].name,
-                                "desserte": "TEST",
+                                "desserte": current_line,
                             },
                             "geometry": {
                                 "type": "Point",
@@ -677,16 +667,15 @@
             }
 
 
-
-            function loadStopTimes(line, effective_stop_points) {
-
-                console.log("loadStopTimes");
+            /*
+             * Ajoute des horaires d'arrêts pour la ligne "line" dans l'objet global "stop_times"
+             */
+            function loadStopTimes(line) {
 
                 var current_line = line.ChouettePTNetwork.PTNetwork.lineId.substring(line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
                 current_line = current_line.substring(0, 3);
 
                 stop_times[current_line] = {};
-                console.log(current_line);
 
                 // Création d'un nouveau hash 
                 // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
@@ -712,17 +701,7 @@
                         for (var k = 0; k < timetables[i].vehicleJourneyId.length; k++) {
                             stop_times[current_line][current_date][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
                         }
-
-                        // stop_times[current_line][current_date].sort(function(a, b) {
-                        //     if (a[Object.keys(a)[0]] < b[Object.keys(b)[0]]) return -1;
-                        //     if (a[Object.keys(a)[0]] > b[Object.keys(b)[0]]) return 1;
-                        //     return 0;
-                        // });
-                        // var keysSorted = Object.keys(stop_times[current_line][current_date]).sort(function(a, b) {
-                        //     return stop_times[current_line][current_date][a[Object.keys(a)[0]]] - stop_times[current_line][current_date][b[Object.keys(a)[0]]];
-                        // })
                     }
-
                 }
 
                 // console.log(JSON.stringify(stop_times));
@@ -821,6 +800,34 @@
                 }
 
                 return hash;
+            }
+
+            function getNearbyBikeStations() {
+
+                for (var i = 0; i < stop_points.features.length; i++) {
+
+                    var stop_point = stop_points.features[i];
+
+                    for (var j = 0; j < total_bike_stations.features.length; j++) {
+
+                        var bike_station = total_bike_stations.features[j];
+
+                        var d = getDistance(stop_point.geometry.coordinates[1],
+                            bike_station.geometry.coordinates[1],
+                            stop_point.geometry.coordinates[0],
+                            bike_station.geometry.coordinates[0]);
+
+                        if (d < distanceToStation) {
+
+                            if (!nearby_bike_stations[stop_point.properties.desserte])
+                                nearby_bike_stations[stop_point.properties.desserte] = {};
+
+                            nearby_bike_stations[stop_point.properties.desserte][bike_station.properties.idstation] = {};
+                            nearby_bike_stations[stop_point.properties.desserte][bike_station.properties.idstation].latitude = bike_station.geometry.coordinates[1];
+                            nearby_bike_stations[stop_point.properties.desserte][bike_station.properties.idstation].longitude = bike_station.geometry.coordinates[0];
+                        }
+                    }
+                }
             }
         </script>
 </body>
