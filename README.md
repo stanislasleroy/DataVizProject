@@ -4,6 +4,9 @@
 Les vélos en libre circulation du service Vélo’v sont utilisés par un grand nombre d’usagers à Lyon. Certaines personnes combinent plusieurs moyens de transport pour arriver à destination (trajet multimodal) : bus, métro et vélo.
 Notre but est d'analyser au cours de la journée l’impact des arrivées des rames de métro (et de bus) sur l’évolution du parc de vélos des différentes stations de Vélo’v voisines.
 
+## Réalisation
+Stanislas LEROY & Colas PICARD
+Master 2 IA - Université Claude Bernard Lyon 1
 
 ## Sources des données
 * Localisation des stations Vélo’v :
