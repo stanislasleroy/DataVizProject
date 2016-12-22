@@ -65,7 +65,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initialZoom = 13;
+            var initialZoom = 14;
 
             // Temps de trajet théorique des différents lignes (ms)
             var durationA = 1260000; // 21 minutes
@@ -216,7 +216,8 @@
                         });
                         tooltip.classed('hidden', false)
                             .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
-                            .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus + "<br><br>Coordonnées : " + d.geometry.coordinates[0] + " " + d.geometry.coordinates[1]);
+                            // .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus + "<br><br>Coordonnées : " + d.geometry.coordinates[0] + " " + d.geometry.coordinates[1]);
+                            .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
                         d3.select(this).style("stroke", "red");
                         // d3.select(this).style("stroke-width", "10");
                     })
