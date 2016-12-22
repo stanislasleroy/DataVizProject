@@ -99,6 +99,12 @@
             // var map = L.map('map').setView([45.750000, 4.850000], initialZoom);
             var map = L.map('map').setView([45.766000, 4.865000], initialZoom);
 
+            // var map = new L.Map("map", {
+            //         center: [45.750000, 4.850000],
+            //         zoom: initialZoom
+            //     })
+            //     .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
+
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
                 maxZoom: 18,
@@ -123,29 +129,32 @@
                 // selectedLine = d.properties.code_titan.substring(0, 3);
             })
 
-            var transform = d3.geo.transform({
-                point: projectPoint
-            });
-            var path = d3.geo.path().projection(transform);
+            // var transform = d3.geo.transform({
+            //     point: projectPoint
+            // });
+            // var path = d3.geo.path().projection(transform);
 
             var svg = d3.select(map.getPanes().overlayPane).append("svg");
-
             var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
             var tooltip = d3.select('body').append('div')
                 .attr('class', 'hidden tooltip');
 
-            map.on("viewreset", reset);
+            // map.on("viewreset", reset);
 
 
 
-            // d3.queue()
-            //   .defer(d3.json, "tram.json")
-            //   .await(displaySecondaryLine);
-            //
-            // d3.queue()
-            //   .defer(d3.json, "bus.json")
-            //   .await(displaySecondaryLine);
+
+
+
+
+            d3.queue()
+                .defer(d3.json, "tram.json")
+                .await(displaySecondaryLine);
+
+            d3.queue()
+                .defer(d3.json, "bus.json")
+                .await(displaySecondaryLine);
 
             d3.queue()
                 .defer(d3.json, "point_arret.json")
@@ -164,6 +173,11 @@
              * Création des lignes secondaires : tram et bus
              */
             function displaySecondaryLine(error, lines) {
+
+                var transform = d3.geo.transform({
+                    point: projectPoint
+                });
+                var path = d3.geo.path().projection(transform);
 
                 var feature = g.selectAll("pathTram")
                     .data(lines.features)
@@ -184,6 +198,10 @@
                         return color;
                     });
 
+                map.on("viewreset", function() {
+                    reset(path, lines, feature);
+                });
+
                 reset(path, lines, feature);
             }
 
@@ -193,13 +211,19 @@
              */
             function displayPrimaryLine(error, stationsMetro, lines, stationsVelo, stopTimes301, stopTimes302, stopTimes303, stopTimes304, stopTimes325, stopTimes326) {
 
+                var transform = d3.geo.transform({
+                    point: projectPoint
+                });
+                var path1 = d3.geo.path().projection(transform);
+                var path2 = d3.geo.path().projection(transform);
+                var path3 = d3.geo.path().projection(transform);
 
                 total_bike_stations = stationsVelo;
 
                 /*
                  * Affichage des stations Vélo'v
                  */
-                var feature = g.selectAll("pathVelov")
+                var feature1 = g.selectAll("pathVelov")
                     .data(stationsVelo.features)
                     .enter().append("path")
                     .classed("stationsVelo", true)
@@ -227,8 +251,12 @@
                         // d3.select(this).style("stroke-width", "2");
                     });
 
-                reset(path, stationsVelo, feature);
 
+                map.on("viewreset", function() {
+                    reset(path1, stationsVelo, feature1);
+                });
+
+                reset(path1, stationsVelo, feature1);
 
 
                 // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
@@ -258,12 +286,12 @@
                     }
                 }
 
-                /*
-                 * Affichage des stations Métro
-                 */
-                // console.log(JSON.stringify(stationsMetro.features[0]));
-                // console.log(stationsMetro.features[0]);
-                // console.log(stationsMetro.features.length);
+                // /*
+                //  * Affichage des stations Métro
+                //  */
+                // // console.log(JSON.stringify(stationsMetro.features[0]));
+                // // console.log(stationsMetro.features[0]);
+                // // console.log(stationsMetro.features.length);
 
                 var effective_stop_points;
 
@@ -298,7 +326,7 @@
 
 
 
-                var feature = g.selectAll("pathStationsMetro")
+                var feature2 = g.selectAll("pathStationsMetro")
                     // .data(stationsMetro.features)
                     .data(stop_points.features)
                     .enter().append("path")
@@ -334,13 +362,17 @@
                         return color;
                     });
 
-                reset(path, stationsMetro, feature);
+                map.on("viewreset", function() {
+                    reset(path2, stop_points, feature2);
+                });
+
+                reset(path2, stop_points, feature2);
 
 
                 /*
                  * Affichage des lignes de Métro
                  */
-                var feature = g.selectAll("pathMetroLine")
+                var feature3 = g.selectAll("pathMetroLine")
                     .data(lines.features)
                     .enter().append("path")
                     .classed("lineMetro", true)
@@ -388,7 +420,11 @@
                         d3.select(this).style("stroke-width", 4);
                     });
 
-                reset(path, lines, feature);
+                map.on("viewreset", function() {
+                    reset(path3, lines, feature3);
+                });
+
+                reset(path3, lines, feature3);
 
 
 
@@ -555,9 +591,10 @@
 
 
             // Reposition the SVG to cover the features.
-            function reset(inputPath, collection, feature) {
 
-                var bounds = inputPath.bounds(collection),
+            function reset(_path, _collection, _feature) {
+
+                var bounds = _path.bounds(_collection),
                     topLeft = bounds[0],
                     bottomRight = bounds[1];
 
@@ -567,7 +604,8 @@
                     .style("top", topLeft[1] + "px");
 
                 g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-                feature.attr("d", inputPath);
+
+                _feature.attr("d", _path);
             }
 
             function getTransform(node) {

@@ -1,0 +1,98 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3-queue.v3.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js">
+    </script>
+    <style>
+        #map {
+            width: 960px;
+            height: 500px;
+        }
+        
+        svg {
+            position: relative;
+        }
+        
+        path {
+            fill: #000;
+            fill-opacity: .2;
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+        
+        path:hover {
+            fill: brown;
+            fill-opacity: .7;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+        <span id="week">heure</span>
+    </div>
+    <div id="map">
+
+        <!--<div id="map" style="width: 600px; height: 400px"></div>-->
+
+        <script>
+            var map = new L.Map("map", {
+                    center: [37.8, -96.9],
+                    zoom: 4
+                })
+                .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
+
+            var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+                g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+            d3.json("us_states.json", function(error, collection) {
+                if (error) throw error;
+
+                var transform = d3.geo.transform({
+                        point: projectPoint
+                    }),
+                    path = d3.geo.path().projection(transform);
+
+                var feature = g.selectAll("path")
+                    .data(collection.features)
+                    .enter().append("path");
+
+                map.on("viewreset", reset);
+                reset();
+
+                // Reposition the SVG to cover the features.
+                function reset() {
+
+                    console.log(path);
+                    console.log(collection);
+
+
+                    var bounds = path.bounds(collection),
+                        topLeft = bounds[0],
+                        bottomRight = bounds[1];
+
+                    svg.attr("width", bottomRight[0] - topLeft[0])
+                        .attr("height", bottomRight[1] - topLeft[1])
+                        .style("left", topLeft[0] + "px")
+                        .style("top", topLeft[1] + "px");
+
+                    g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+                    feature.attr("d", path);
+                }
+
+                // Use Leaflet to implement a D3 geometric transformation.
+                function projectPoint(x, y) {
+                    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                    this.stream.point(point.x, point.y);
+                }
+            });
+        </script>
+</body>
+
+</html>
