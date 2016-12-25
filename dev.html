@@ -75,7 +75,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initial_zoom = 14;
+            var initial_zoom = 15;
             var current_zoom;
 
             // Temps de trajet théorique des différents lignes (ms)
@@ -216,10 +216,78 @@
             }
 
 
+            // var dataset = {
+            //     apples: [53245, 28479, 19697, 24037, 40245],
+            // };
+
+            // var width = 460,
+            //     height = 300,
+            //     radius = Math.min(width, height) / 2;
+
+            // var color = d3.scale.category20();
+
+            // var pie = d3.layout.pie()
+            //     .sort(null);
+
+            // var arc = d3.svg.arc()
+            //     .innerRadius(radius - 100)
+            //     .outerRadius(radius - 50);
+
+            // // var svg = d3.select("body").append("svg")
+            // //     .attr("width", width)
+            // //     .attr("height", height)
+            // //     .append("g")
+            // //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+            // var path = g.selectAll("path")
+            //     .data(pie(dataset.apples))
+            //     .enter().append("path")
+            //     .attr("transform", "translate(" + 300 + "," + 400 + ")")
+            //     .attr("fill", function(d, i) {
+            //         return color(i);
+            //     })
+            //     .attr("d", arc);
+
+
             /*
              * Affichage des lignes de métro et des stations
              */
             function displayPrimaryLine(error, stationsMetro, lines, stationsVelo, stopTimes301, stopTimes302, stopTimes303, stopTimes304, stopTimes325, stopTimes326, horaires) {
+
+
+
+                // var dataset = {
+                //     apples: [53245, 28479, 19697, 24037, 40245],
+                // };
+
+                // var width = 460,
+                //     height = 300,
+                //     radius = Math.min(width, height) / 2;
+
+                // var color = d3.scale.category20();
+
+                // var pie = d3.layout.pie()
+                //     .sort(null);
+
+                // var arc = d3.svg.arc()
+                //     .innerRadius(radius - 100)
+                //     .outerRadius(radius - 50);
+
+                // // var svg = d3.select("body").append("svg")
+                // //     .attr("width", width)
+                // //     .attr("height", height)
+                // //     .append("g")
+                // //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+                // var path = g.selectAll("path")
+                //     .data(pie(dataset.apples))
+                //     .enter().append("path")
+                //     .attr("fill", function(d, i) {
+                //         return color(i);
+                //     })
+                //     .attr("d", arc);
+
+
 
                 var path1 = d3.geo.path().projection(transform);
                 var path2 = d3.geo.path().projection(transform);
@@ -373,6 +441,54 @@
                 });
 
                 reset(path2, stop_points, feature2);
+
+
+
+
+
+
+                for (var bike_station_id in nearby_bike_stations["301"]) {
+
+                    // var bike_station = nearby_bike_stations[code_titan][bike_station_id];
+                    var bike_station = nearby_bike_stations["301"][bike_station_id];
+
+                    var path4 = d3.geo.path().projection(transform);
+
+                    var dataset = {
+                        apples: [53245, 28479],
+                    };
+
+                    var width = 460,
+                        height = 300,
+                        radius = Math.min(width, height) / 2;
+
+                    var color = d3.scale.category10();
+
+                    var pie = d3.layout.pie()
+                        .sort(null);
+
+                    var arc = d3.svg.arc()
+                        .innerRadius(30)
+                        .outerRadius(20);
+
+                    var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+
+                    var f = g.selectAll("pathPie")
+                        .data(pie(dataset.apples))
+                        .enter().append("path")
+                        .attr("transform", "translate(" + point2.x + "," + point2.y + ")")
+                        .attr("fill", function(d, i) {
+                            return color(i);
+                        })
+                        .attr("d", arc);
+
+                    // map.on("viewreset", function() {
+                    //     reset(path4, dataset.apples, f);
+                    // });
+
+                    // reset(path4, dataset.apples, f);
+
+                }
 
 
                 /*
@@ -533,6 +649,27 @@
                                                             // Si la rame est proche de la station de Vélo'v
                                                             if (dist_to_bike_station < distanceToStation) {
 
+
+
+
+
+
+
+
+                                                                // map.on("viewreset", function() {
+                                                                //     reset(path4, dataset.apples, f);
+                                                                // });
+
+                                                                // reset(path4, dataset.apples, f);
+
+
+
+
+
+
+
+
+
                                                                 if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
                                                                     // if (d3.select(data).attr("code_titan") == "301") {
 
@@ -547,78 +684,93 @@
                                                                             var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
                                                                             // console.log(current_station_id);
 
-                                                                            if (current_station_id == "7606") {
+                                                                            // if (current_station_id == "7606") {
 
-                                                                                var journey_id = Object.keys(journeys)[index];
-                                                                                var journey = journeys[journey_id];
+                                                                            var journey_id = Object.keys(journeys)[index];
+                                                                            var journey = journeys[journey_id];
 
-                                                                                var passage_time = journey[current_station_id];
-                                                                                var passage_date = new Date(current_day + "T" + passage_time);
+                                                                            var passage_time = journey[current_station_id];
+                                                                            var passage_date = new Date(current_day + "T" + passage_time);
 
-                                                                                passage_date.setTime(passage_date.getTime() + passage_date.getTimezoneOffset() * 60 * 1000);
+                                                                            passage_date.setTime(passage_date.getTime() + passage_date.getTimezoneOffset() * 60 * 1000);
 
-                                                                                var coeff = 1000 * 60 * 5;
-                                                                                var date = new Date();
-                                                                                var rounded = new Date(Math.round(passage_date.getTime() / coeff) * coeff);
+                                                                            var coeff = 1000 * 60 * 5;
+                                                                            var date = new Date();
+                                                                            var rounded = new Date(Math.round(passage_date.getTime() / coeff) * coeff);
 
-                                                                                var date_before;
-                                                                                var date_after;
+                                                                            var date_before;
+                                                                            var date_after;
 
-                                                                                if (passage_date < rounded) {
-                                                                                    date_before = new Date(rounded.getTime() - 5 * 60000);
-                                                                                    date_after = rounded;
-                                                                                } else {
-                                                                                    date_after = new Date(rounded.getTime() + 5 * 60000);
-                                                                                    date_before = rounded;
-                                                                                }
-
-                                                                                if (h[current_day][date_before.toLocaleTimeString()] && h[current_day][date_after.toLocaleTimeString()]) {
-
-                                                                                    var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
-                                                                                    console.log("Offset : " + available_bikes_offset);
-
-                                                                                    if (available_bikes_offset != 0) {
-
-                                                                                        // Si le zoom est au niveau macro/global = 13/14
-                                                                                        // Cercles concentriques sur les stations de Vélo'v
-
-                                                                                        var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
-
-                                                                                        var nb_circles = 0;
-                                                                                        setInterval(function() {
-                                                                                            console.log(nb_circles);
-                                                                                            g.append("circle")
-                                                                                                .attr("class", "ring")
-                                                                                                .attr("transform", "translate(" + point.x + ", " + point.y + ")")
-                                                                                                .attr("r", 6)
-                                                                                                .style("stroke-width", 1)
-                                                                                                .style("stroke", "red")
-                                                                                                .transition()
-                                                                                                .ease("linear")
-                                                                                                .duration(6000)
-                                                                                                .style("stroke-opacity", 1e-6)
-                                                                                                .style("stroke-width", 1)
-                                                                                                .style("stroke", "brown")
-                                                                                                .attr("r", 50)
-                                                                                                .remove();
-
-                                                                                            nb_circles++;
-                                                                                        }, 750);
-
-
-                                                                                        // if (current_zoom == 13 || current_zoom == 14) {
-                                                                                        //     console.log("Cercles concentriques");
-                                                                                        // } else if (current_zoom == 1) {
-                                                                                        //     console.log("Camemberts");
-                                                                                        // }
-
-
-                                                                                        // Si le  zoom est au niveau micro/local = 15
-                                                                                        // Affichage de camemberts
-                                                                                    }
-
-                                                                                }
+                                                                            if (passage_date < rounded) {
+                                                                                date_before = new Date(rounded.getTime() - 5 * 60000);
+                                                                                date_after = rounded;
+                                                                            } else {
+                                                                                date_after = new Date(rounded.getTime() + 5 * 60000);
+                                                                                date_before = rounded;
                                                                             }
+
+                                                                            if (h[current_day][date_before.toLocaleTimeString()] && h[current_day][date_after.toLocaleTimeString()]) {
+
+                                                                                var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
+                                                                                console.log("Offset : " + available_bikes_offset);
+
+                                                                                // if (available_bikes_offset != 0) {
+                                                                                if (available_bikes_offset > 0) {
+
+                                                                                    // Si le zoom est au niveau macro/global = 13/14
+                                                                                    // Cercles concentriques sur les stations de Vélo'v
+
+                                                                                    var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+
+                                                                                    var nb_circles = 0;
+
+                                                                                    var y = setInterval(function() {
+
+                                                                                        if (nb_circles > available_bikes_offset)
+                                                                                            clearInterval(y);
+
+                                                                                        // console.log(nb_circles);
+                                                                                        g.append("circle")
+                                                                                            .attr("class", "ring")
+                                                                                            .attr("transform", "translate(" + point.x + ", " + point.y + ")")
+                                                                                            .attr("r", 6)
+                                                                                            .style("stroke-width", 1)
+                                                                                            .style("stroke", "red")
+                                                                                            .transition()
+                                                                                            .ease("linear")
+                                                                                            .duration(6000)
+                                                                                            .style("stroke-opacity", 1e-6)
+                                                                                            .style("stroke-width", 1)
+                                                                                            .style("stroke", "brown")
+                                                                                            .attr("r", 50)
+                                                                                            .remove();
+
+                                                                                        nb_circles++;
+                                                                                    }, 750);
+
+
+
+
+
+
+                                                                                    // if (current_zoom == 13 || current_zoom == 14) {
+
+
+                                                                                    //     console.log("Cercles concentriques");
+
+
+
+                                                                                    // } else if (current_zoom == 15) {
+                                                                                    //     console.log("Camemberts");
+                                                                                    // }
+
+
+                                                                                    // Si le  zoom est au niveau micro/local = 15
+                                                                                    // Affichage de camemberts
+                                                                                }
+
+                                                                            }
+                                                                            // }
                                                                         }
                                                                     }
 
