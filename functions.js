@@ -2,6 +2,9 @@
 
 function reset(_path, _collection, _feature) {
 
+    current_zoom = map.getZoom();
+    console.log("Current zoom = " + map.getZoom());
+
     var bounds = _path.bounds(_collection),
         topLeft = bounds[0],
         bottomRight = bounds[1];
