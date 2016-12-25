@@ -103,6 +103,7 @@
             var nearby_bike_stations = {};
 
             var bike_stations_history = {};
+            var bike_stations_current_data = {};
 
             var stop_times = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -443,20 +444,53 @@
                 reset(path2, stop_points, feature2);
 
 
-
-
+                console.log(JSON.stringify(bike_stations_current_data));
 
 
                 for (var bike_station_id in nearby_bike_stations["301"]) {
+
+                    // console.log(bike_station_id);
 
                     // var bike_station = nearby_bike_stations[code_titan][bike_station_id];
                     var bike_station = nearby_bike_stations["301"][bike_station_id];
 
                     var path4 = d3.geo.path().projection(transform);
 
-                    var dataset = {
-                        apples: [53245, 28479],
-                    };
+                    var object = bike_stations_current_data["velov-" + bike_station_id];
+
+                    if (!object) {
+
+                        // console.log("Creation");
+
+                        bike_stations_current_data["velov-" + bike_station_id] = {
+                            "numbers": [{
+                                "name": "talk_1",
+                                "number": 722,
+                            }, {
+                                "name": "talk_2",
+                                "number": 1000,
+                            }]
+                        };
+
+                        // bike_stations_current_data["velov-" + bike_station_id] = {
+                        //     // bike_stations_current_data = {
+                        //     numbers: [
+                        //         900, 1000
+                        //     ]
+                        // };
+                    }
+
+                    // console.log(JSON.stringify(bike_stations_current_data));
+
+
+
+                    // console.log(bike_stations_current_data);
+                    // console.log(bike_stations_current_data["velov-" + bike_station_id].numbers);
+
+                    // bike_stations_current_data["velov-" + bike_station_id] = {
+                    // bike_stations_current_data = {
+                    //     numbers: [53245, 28479]
+                    // };
 
                     var width = 460,
                         height = 300,
@@ -464,8 +498,16 @@
 
                     var color = d3.scale.category10();
 
+                    // var pie = d3.layout.pie()
+                    //     .sort(null);
+
                     var pie = d3.layout.pie()
-                        .sort(null);
+                        .sort(null)
+                        .value(function(d) {
+                            // console.log("d : " + d);
+                            return d.number;
+                            // return d;
+                        });
 
                     var arc = d3.svg.arc()
                         .innerRadius(30)
@@ -473,14 +515,63 @@
 
                     var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                    var f = g.selectAll("pathPie")
-                        .data(pie(dataset.apples))
+                    // var f = g.selectAll("pathPie")
+                    // .data(pie(dataset.apples))
+                    // if (!bike_stations_current_data["velov-" + bike_station_id]) {
+
+                    //     bike_stations_current_data["velov-" + bike_station_id] = {};
+
+                    //     bike_stations_current_data["velov-" + bike_station_id].push({
+                    //         number: 0
+                    //     });
+
+                    //     bike_stations_current_data["velov-" + bike_station_id].push({
+                    //         number: 0
+                    //     });
+                    // }
+
+                    // var f = g.datum(dataset.apples).selectAll("pathPie")
+                    var f = g.datum(bike_stations_current_data["velov-" + bike_station_id].numbers).selectAll("pathPie")
+                        // var f = g.datum(bike_stations_current_data.numbers).selectAll("pathPie")
+                        .data(pie)
                         .enter().append("path")
                         .attr("transform", "translate(" + point2.x + "," + point2.y + ")")
                         .attr("fill", function(d, i) {
                             return color(i);
                         })
                         .attr("d", arc);
+
+
+
+
+                    var timeout = setTimeout(function() {
+                        change();
+                    }, 2000);
+
+
+                    function change() {
+
+                        var value = this.value;
+                        clearTimeout(timeout);
+                        pie.value(function(d) {
+                            // return d[value];
+                            console.log(d.number);
+                            // return value;
+                            return d.number;
+                        }); // change the value function
+                        f = f.data(pie); // compute the new angles
+                        // f.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
+                    }
+
+
+                    function arcTween(a) {
+                        console.log(a);
+                        var i = d3.interpolate(this._current, a);
+                        this._current = i(0);
+                        return function(t) {
+                            return arc(i(t));
+                        };
+                    }
 
                     // map.on("viewreset", function() {
                     //     reset(path4, dataset.apples, f);
@@ -677,6 +768,21 @@
 
                                                                     var h = bike_stations_history["velov-" + bike_station_id];
 
+                                                                    var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
+
+                                                                    bike_stations_current_data["velov-" + bike_station_id] = {
+                                                                        "numbers": [{
+                                                                            "name": "talk_1",
+                                                                            "number": 10,
+                                                                        }, {
+                                                                            "name": "talk_2",
+                                                                            "number": 60,
+                                                                        }]
+                                                                    };
+
+                                                                    console.log(JSON.stringify(bike_stations_current_data));
+
+
 
                                                                     if (h) {
                                                                         if (h[current_day]) {
@@ -709,7 +815,34 @@
                                                                                 date_before = rounded;
                                                                             }
 
+
+
+
                                                                             if (h[current_day][date_before.toLocaleTimeString()] && h[current_day][date_after.toLocaleTimeString()]) {
+
+                                                                                // if (!bike_stations_current_data[current_station_id])
+                                                                                // bike_stations_current_data[current_station_id] = [];
+
+                                                                                // bike_stations_current_data[current_station_id].available_bikes = h[current_day][date_after.toLocaleTimeString()].available_bikes;
+                                                                                // bike_stations_current_data[current_station_id].push(h[current_day][date_after.toLocaleTimeString()].available_bikes);
+                                                                                // bike_stations_current_data[current_station_id].available_bike_stands = h[current_day][date_after.toLocaleTimeString()].available_bike_stands;
+                                                                                // bike_stations_current_data[current_station_id].push(h[current_day][date_after.toLocaleTimeString()].available_bike_stands);
+                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[0] = h[current_day][date_after.toLocaleTimeString()].available_bikes;
+
+                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[1] = h[current_day][date_after.toLocaleTimeString()].available_bike_stands
+                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[0] = 10;
+                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[1] = 50;
+
+                                                                                // bike_stations_current_data["velov-" + bike_station_id] = {
+                                                                                //     "numbers": [{
+                                                                                //         "name": "talk_1",
+                                                                                //         "number": 10,
+                                                                                //     }, {
+                                                                                //         "name": "talk_2",
+                                                                                //         "number": 60,
+                                                                                //     }]
+                                                                                // };
+
 
                                                                                 var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
                                                                                 console.log("Offset : " + available_bikes_offset);
