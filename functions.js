@@ -5,6 +5,21 @@ function reset(_path, _collection, _feature) {
     current_zoom = map.getZoom();
     console.log("Current zoom = " + map.getZoom());
 
+    // if (current_zoom === 15) {
+    //     d3.selectAll('.pie').each(function(d, i) {
+    //         d3.select(this).classed("hidden", false);
+    //     });
+    // } else {
+
+    //     d3.selectAll('.pie').each(function(d, i) {
+    //         d3.select(this).classed("hidden", true);
+    //     });
+
+    //     // if (current_zoom === 13 || current_zoom === 14) {
+
+    //     // }
+    // }
+
     var bounds = _path.bounds(_collection),
         topLeft = bounds[0],
         bottomRight = bounds[1];

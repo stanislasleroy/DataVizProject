@@ -41,10 +41,6 @@
             display: none;
         }
         
-        .dot {
-            fill: #c7141a;
-        }
-        
         .ring {
             fill: none;
             stroke: #c7141a;
@@ -101,9 +97,7 @@
 
             var total_bike_stations = {};
             var nearby_bike_stations = {};
-
             var bike_stations_history = {};
-            var bike_stations_current_data = {};
 
             var stop_times = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -159,13 +153,13 @@
 
 
 
-            // d3.queue()
-            //     .defer(d3.json, "tram.json")
-            //     .await(displaySecondaryLine);
+            d3.queue()
+                .defer(d3.json, "tram.json")
+                .await(displaySecondaryLine);
 
-            // d3.queue()
-            //     .defer(d3.json, "bus.json")
-            //     .await(displaySecondaryLine);
+            d3.queue()
+                .defer(d3.json, "bus.json")
+                .await(displaySecondaryLine);
 
             d3.queue()
                 .defer(d3.json, "point_arret.json")
@@ -218,85 +212,16 @@
             }
 
 
-            // var dataset = {
-            //     apples: [53245, 28479, 19697, 24037, 40245],
-            // };
-
-            // var width = 460,
-            //     height = 300,
-            //     radius = Math.min(width, height) / 2;
-
-            // var color = d3.scale.category20();
-
-            // var pie = d3.layout.pie()
-            //     .sort(null);
-
-            // var arc = d3.svg.arc()
-            //     .innerRadius(radius - 100)
-            //     .outerRadius(radius - 50);
-
-            // // var svg = d3.select("body").append("svg")
-            // //     .attr("width", width)
-            // //     .attr("height", height)
-            // //     .append("g")
-            // //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-            // var path = g.selectAll("path")
-            //     .data(pie(dataset.apples))
-            //     .enter().append("path")
-            //     .attr("transform", "translate(" + 300 + "," + 400 + ")")
-            //     .attr("fill", function(d, i) {
-            //         return color(i);
-            //     })
-            //     .attr("d", arc);
-
-
             /*
              * Affichage des lignes de métro et des stations
              */
             function displayPrimaryLine(error, stationsMetro, lines, stationsVelo, stopTimes301, stopTimes302, stopTimes303, stopTimes304, stopTimes325, stopTimes326, horaires) {
-
-
-
-                // var dataset = {
-                //     apples: [53245, 28479, 19697, 24037, 40245],
-                // };
-
-                // var width = 460,
-                //     height = 300,
-                //     radius = Math.min(width, height) / 2;
-
-                // var color = d3.scale.category20();
-
-                // var pie = d3.layout.pie()
-                //     .sort(null);
-
-                // var arc = d3.svg.arc()
-                //     .innerRadius(radius - 100)
-                //     .outerRadius(radius - 50);
-
-                // // var svg = d3.select("body").append("svg")
-                // //     .attr("width", width)
-                // //     .attr("height", height)
-                // //     .append("g")
-                // //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-                // var path = g.selectAll("path")
-                //     .data(pie(dataset.apples))
-                //     .enter().append("path")
-                //     .attr("fill", function(d, i) {
-                //         return color(i);
-                //     })
-                //     .attr("d", arc);
-
-
 
                 var path1 = d3.geo.path().projection(transform);
                 var path2 = d3.geo.path().projection(transform);
                 var path3 = d3.geo.path().projection(transform);
 
                 total_bike_stations = stationsVelo;
-
 
                 loadBikeStationsHistory(horaires);
 
@@ -441,151 +366,114 @@
                 reset(path2, stop_points, feature2);
 
 
-                console.log(JSON.stringify(bike_stations_current_data));
 
-
-
-
+                // Affichage des donut
 
                 var data1 = [{
-                    "crimeType": "mip",
-                    "totalCrimes": 10
+                    "type": "available_bikes",
+                    "number": 0
                 }, {
-                    "crimeType": "theft",
-                    "totalCrimes": 10
+                    "type": "available_bike_stands",
+                    "number": 20
                 }];
-
-
-                var data2 = [{
-                    "crimeType": "mip",
-                    "totalCrimes": 10
-                }, {
-                    "crimeType": "theft",
-                    "totalCrimes": 30
-                }];
-
-
-
 
                 ////////////////////////////////////
-
-                var bike_station = nearby_bike_stations["301"]["6022"];
-
-                var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
-
-
-                var width = 800,
-                    height = 250,
-                    radius = Math.min(width, height) / 2;
-
-                var color = d3.scale.category10();
-
-                var arc = d3.svg.arc()
-                    .outerRadius(30)
-                    .innerRadius(20);
-
-                var pie = d3.layout.pie()
-                    .sort(null)
-                    .value(function(d) {
-                        return d.totalCrimes;
-                    });
-
-
-                var path = g.selectAll("piePath")
-                    .data(pie(data1))
-                    .enter()
-                    .append("path")
-                    .attr("fill", function(d, i) {
-                        return color(d.data.crimeType);
-                    })
-                    .attr("transform", "translate(" + point2.x + "," + point2.y + ")");
-
-
-                path.transition()
-                    .duration(500)
-                    .attr("fill", function(d, i) {
-                        console.log(d);
-                        // return "red";
-                        return color(d.data.crimeType);
-                    })
-                    .attr("d", arc)
-                    .each(function(d) {
-                        this._current = d;
-                    }); // store the initial angles
-
-
-                function change(data) {
-                    console.log("Change");
-                    path.data(pie(data));
-                    path.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
-
-                }
-
-                // Store the displayed angles in _current.
-                // Then, interpolate from _current to the new angles.
-                // During the transition, _current is updated in-place by d3.interpolate.
-
-                function arcTween(a) {
-                    var i = d3.interpolate(this._current, a);
-                    this._current = i(0);
-                    return function(t) {
-                        return arc(i(t));
-                    };
-                }
-
-
                 // setTimeout(function() {
                 //     change(data2);
                 // }, 2000);
                 ////////////////////////////////////
 
 
+                var zoom = d3.behavior.zoom()
+                    .on("zoom", function() {
 
-                // for (var bike_station_id in nearby_bike_stations["301"]) {
+                        console.log("Zoom");
+                        // g.attr("transform", "translate(" +
+                        //     d3.event.translate.join(",") + ")scale(" + d3.event.scale + ")");
+                        // g.selectAll("circle")
+                        //     .attr("d", path.projection(projection))
+                        //     .attr("r", 5 / zoom.scale());
+                        // g.selectAll("path")
+                        //     .attr("d", path.projection(projection));
+                    });
 
-
-                //     // console.log(bike_station_id);
-
-                //     // var bike_station = nearby_bike_stations[code_titan][bike_station_id];
-                //     var bike_station = nearby_bike_stations["301"][bike_station_id];
-
-                //     var path4 = d3.geo.path().projection(transform);
-
-                //     var object = bike_stations_current_data["velov-" + bike_station_id];
-
-                //     if (!object) {
-
-                //         // console.log("Creation");
-
-                //         bike_stations_current_data["velov-" + bike_station_id] = {
-                //             "numbers": [{
-                //                 "name": "talk_1",
-                //                 "number": 722,
-                //             }, {
-                //                 "name": "talk_2",
-                //                 "number": 1000,
-                //             }]
-                //         };
-
-                //         // bike_stations_current_data["velov-" + bike_station_id] = {
-                //         //     // bike_stations_current_data = {
-                //         //     numbers: [
-                //         //         900, 1000
-                //         //     ]
-                //         // };
-                //     }
-
-                //     // console.log(JSON.stringify(bike_stations_current_data));
+                map.on('zoomend', function() {
+                    console.log("Zoom");
+                });
 
 
 
-                //     // map.on("viewreset", function() {
-                //     //     reset(path4, dataset.apples, f);
-                //     // });
 
-                //     // reset(path4, dataset.apples, f);
+                for (var bike_station_id in nearby_bike_stations["301"]) {
 
-                // }
+                    var path5 = d3.geo.path().projection(transform);
+
+                    var bike_station = nearby_bike_stations["301"][bike_station_id];
+                    var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+
+                    var width = 800,
+                        height = 250,
+                        radius = Math.min(width, height) / 2;
+
+                    var color = d3.scale.category10();
+
+                    var arc = d3.svg.arc()
+                        .outerRadius(30)
+                        .innerRadius(20);
+
+                    var pie = d3.layout.pie()
+                        .sort(null)
+                        .value(function(d) {
+                            return d.number;
+                        });
+
+                    var feat = g.selectAll("piePath")
+                        .data(pie(data1))
+                        .enter()
+                        .append("path")
+                        .attr("id", "pie-velov-" + bike_station_id)
+                        .classed("pie", true)
+                        .attr("fill", function(d, i) {
+                            return color(d.data.type);
+                        })
+                        .attr("transform", "translate(" + point2.x + "," + point2.y + ")");
+
+                    feat.transition()
+                        .duration(500)
+                        .attr("fill", function(d, i) {
+                            return color(d.data.type);
+                        })
+                        .attr("d", arc)
+                        .each(function(d) {
+                            this._current = d;
+                        }); // store the initial angles
+
+                    // map.on("viewreset", function() {
+                    //     reset(path5, data1, feat);
+                    // });
+
+                    // reset(path5, data1, feat);
+
+
+                    function change(_id, data) {
+                        p = d3.selectAll("#pie-velov-" +
+                            _id);
+                        p.data(pie(data));
+                        p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
+                    }
+
+                    // Store the displayed angles in _current.
+                    // Then, interpolate from _current to the new angles.
+                    // During the transition, _current is updated in-place by d3.interpolate.
+
+                    function arcTween(a) {
+                        var i = d3.interpolate(this._current, a);
+                        this._current = i(0);
+                        return function(t) {
+                            return arc(i(t));
+                        };
+                    }
+                }
 
 
 
@@ -747,21 +635,6 @@
                                                             // Si la rame est proche de la station de Vélo'v
                                                             if (dist_to_bike_station < distanceToStation) {
 
-
-
-
-
-
-                                                                // map.on("viewreset", function() {
-                                                                //     reset(path4, dataset.apples, f);
-                                                                // });
-
-                                                                // reset(path4, dataset.apples, f);
-
-
-
-
-
                                                                 // if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
                                                                 if (d3.select(data).attr("code_titan") == "301") {
 
@@ -771,26 +644,8 @@
 
                                                                     var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
 
-                                                                    // bike_stations_current_data["velov-" + bike_station_id] = {
-                                                                    //     "numbers": [{
-                                                                    //         "name": "talk_1",
-                                                                    //         "number": 10,
-                                                                    //     }, {
-                                                                    //         "name": "talk_2",
-                                                                    //         "number": 60,
-                                                                    //     }]
-                                                                    // };
-
-                                                                    // console.log(JSON.stringify(bike_stations_current_data));
-                                                                    // change(bike_station_id);
-
-
-
-
                                                                     if (h) {
                                                                         if (h[current_day]) {
-
-
 
                                                                             var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
                                                                             // console.log(current_station_id);
@@ -821,101 +676,66 @@
                                                                             }
 
 
-
-
                                                                             if (h[current_day][date_before.toLocaleTimeString()] && h[current_day][date_after.toLocaleTimeString()]) {
 
-                                                                                // if (!bike_stations_current_data[current_station_id])
-                                                                                // bike_stations_current_data[current_station_id] = [];
-
-                                                                                // bike_stations_current_data[current_station_id].available_bikes = h[current_day][date_after.toLocaleTimeString()].available_bikes;
-                                                                                // bike_stations_current_data[current_station_id].push(h[current_day][date_after.toLocaleTimeString()].available_bikes);
-                                                                                // bike_stations_current_data[current_station_id].available_bike_stands = h[current_day][date_after.toLocaleTimeString()].available_bike_stands;
-                                                                                // bike_stations_current_data[current_station_id].push(h[current_day][date_after.toLocaleTimeString()].available_bike_stands);
-                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[0] = h[current_day][date_after.toLocaleTimeString()].available_bikes;
-
-                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[1] = h[current_day][date_after.toLocaleTimeString()].available_bike_stands
-                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[0] = 10;
-                                                                                // bike_stations_current_data["velov-" + bike_station_id].numbers[1] = 50;
-
-                                                                                // bike_stations_current_data["velov-" + bike_station_id] = {
-                                                                                //     "numbers": [{
-                                                                                //         "name": "talk_1",
-                                                                                //         "number": 10,
-                                                                                //     }, {
-                                                                                //         "name": "talk_2",
-                                                                                //         "number": 60,
-                                                                                //     }]
-                                                                                // };
-
-                                                                                var data2 = [{
-                                                                                    "crimeType": "mip",
-                                                                                    "totalCrimes": h[current_day][date_after.toLocaleTimeString()].available_bikes
+                                                                                var new_data = [{
+                                                                                    "type": "available_bikes",
+                                                                                    "number": h[current_day][date_after.toLocaleTimeString()].available_bikes
                                                                                 }, {
-                                                                                    "crimeType": "theft",
-                                                                                    "totalCrimes": h[current_day][date_after.toLocaleTimeString()].available_bike_stands
+                                                                                    "type": "available_bike_stands",
+                                                                                    "number": h[current_day][date_after.toLocaleTimeString()].available_bike_stands
                                                                                 }];
 
-                                                                                change(data2);
+                                                                                change(bike_station_id, new_data);
 
 
                                                                                 var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
-                                                                                console.log("Offset : " + available_bikes_offset);
+                                                                                // console.log("Offset : " + available_bikes_offset);
+                                                                                console.log(h[current_day][date_before.toLocaleTimeString()].available_bikes +
+                                                                                    "/" + h[current_day][date_before.toLocaleTimeString()].available_bike_stands +
+                                                                                    " =>" + h[current_day][date_after.toLocaleTimeString()].available_bikes +
+                                                                                    "/" + h[current_day][date_after.toLocaleTimeString()].available_bike_stands +
+                                                                                    " -> Offset : " + available_bikes_offset);
+
 
                                                                                 // if (available_bikes_offset != 0) {
-                                                                                if (available_bikes_offset > 0) {
+                                                                                // if (available_bikes_offset < 0 && current_station_id == "velov-6004") {
 
-                                                                                    // Si le zoom est au niveau macro/global = 13/14
-                                                                                    // Cercles concentriques sur les stations de Vélo'v
+                                                                                // Si le zoom est au niveau macro/global = 13/14
+                                                                                // Cercles concentriques sur les stations de Vélo'v
 
-                                                                                    var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+                                                                                var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                                                                                    var nb_circles = 0;
+                                                                                var nb_circles = 0;
 
-                                                                                    // var y = setInterval(function() {
+                                                                                var y = setInterval(function() {
 
-                                                                                    //     if (nb_circles > available_bikes_offset)
-                                                                                    //         clearInterval(y);
+                                                                                    if (nb_circles > Math.abs(available_bikes_offset))
+                                                                                        clearInterval(y);
 
-                                                                                    //     // console.log(nb_circles);
-                                                                                    //     g.append("circle")
-                                                                                    //         .attr("class", "ring")
-                                                                                    //         .attr("transform", "translate(" + point.x + ", " + point.y + ")")
-                                                                                    //         .attr("r", 6)
-                                                                                    //         .style("stroke-width", 1)
-                                                                                    //         .style("stroke", "red")
-                                                                                    //         .transition()
-                                                                                    //         .ease("linear")
-                                                                                    //         .duration(6000)
-                                                                                    //         .style("stroke-opacity", 1e-6)
-                                                                                    //         .style("stroke-width", 1)
-                                                                                    //         .style("stroke", "brown")
-                                                                                    //         .attr("r", 50)
-                                                                                    //         .remove();
+                                                                                    // console.log(nb_circles);
+                                                                                    g.append("circle")
+                                                                                        .attr("class", "ring")
+                                                                                        .attr("transform", "translate(" + point.x + ", " + point.y + ")")
+                                                                                        .attr("r", 6)
+                                                                                        .style("stroke-width", 1)
+                                                                                        .style("stroke", "red")
+                                                                                        .transition()
+                                                                                        .ease("linear")
+                                                                                        .duration(6000)
+                                                                                        .style("stroke-opacity", 1e-6)
+                                                                                        .style("stroke-width", 1)
+                                                                                        .style("stroke", "brown")
+                                                                                        .attr("r", 50)
+                                                                                        .remove();
 
-                                                                                    //     nb_circles++;
-                                                                                    // }, 750);
-
-
+                                                                                    nb_circles++;
+                                                                                }, 750);
 
 
-
-
-                                                                                    // if (current_zoom == 13 || current_zoom == 14) {
-
-
-                                                                                    //     console.log("Cercles concentriques");
-
-
-
-                                                                                    // } else if (current_zoom == 15) {
-                                                                                    //     console.log("Camemberts");
-                                                                                    // }
-
-
-                                                                                    // Si le  zoom est au niveau micro/local = 15
-                                                                                    // Affichage de camemberts
-                                                                                }
+                                                                                // Si le  zoom est au niveau micro/local = 15
+                                                                                // Affichage de camemberts
+                                                                                // }
 
                                                                             }
                                                                             // }
