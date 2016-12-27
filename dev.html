@@ -71,7 +71,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initial_zoom = 15;
+            var initial_zoom = 14;
             var current_zoom;
 
             // Temps de trajet théorique des différents lignes (ms)
@@ -171,7 +171,8 @@
                 .defer(d3.json, "neptune/304.json")
                 .defer(d3.json, "neptune/325.json")
                 .defer(d3.json, "neptune/326.json")
-                .defer(d3.json, "horaires/2012-12-23.json")
+                // .defer(d3.json, "horaires/2012-12-23.json")
+                .defer(d3.json, "GetVelovHistory/history2.json")
                 .await(displayPrimaryLine);
 
 

@@ -296,16 +296,18 @@ function getNearbyBikeStations() {
 
 function loadBikeStationsHistory(history) {
 
-    for (var i = 0; i < history.ObservationCollection.member.length; i++) {
+    console.log(history);
 
-        var member = history.ObservationCollection.member[i];
+    for (var id in history) {
 
-        if (!bike_stations_history[member.name])
-            bike_stations_history[member.name] = {};
+        // console.log(history[id]["values"]);
 
-        for (var j = 0; j < member.result.DataArray.values.length; j++) {
+        if (!bike_stations_history[id])
+            bike_stations_history[id] = {};
 
-            var value = member.result.DataArray.values[j];
+        for (var j = 0; j < history[id]["values"].length; j++) {
+
+            var value = history[id]["values"][j];
 
             var index_1 = value[0].indexOf("T");
             var index_2 = value[0].indexOf("+");
@@ -313,16 +315,46 @@ function loadBikeStationsHistory(history) {
             var day = value[0].substring(0, index_1);
             var hour = value[0].substring(index_1 + 1, index_2);
 
-            if (!bike_stations_history[member.name][day])
-                bike_stations_history[member.name][day] = {};
+            if (!bike_stations_history[id][day])
+                bike_stations_history[id][day] = {};
 
-            if (!bike_stations_history[member.name][day][hour])
-                bike_stations_history[member.name][day][hour] = {};
+            if (!bike_stations_history[id][day][hour])
+                bike_stations_history[id][day][hour] = {};
 
-            bike_stations_history[member.name][day][hour].available_bikes = value[1];
-            bike_stations_history[member.name][day][hour].available_bike_stands = value[2];
+            bike_stations_history[id][day][hour].available_bikes = value[1];
+            bike_stations_history[id][day][hour].available_bike_stands = value[2];
         }
+
+
     }
+
+    // for (var i = 0; i < history.ObservationCollection.member.length; i++) {
+
+    //     var member = history.ObservationCollection.member[i];
+
+    //     if (!bike_stations_history[member.name])
+    //         bike_stations_history[member.name] = {};
+
+    //     for (var j = 0; j < member.result.DataArray.values.length; j++) {
+
+    //         var value = member.result.DataArray.values[j];
+
+    //         var index_1 = value[0].indexOf("T");
+    //         var index_2 = value[0].indexOf("+");
+
+    //         var day = value[0].substring(0, index_1);
+    //         var hour = value[0].substring(index_1 + 1, index_2);
+
+    //         if (!bike_stations_history[member.name][day])
+    //             bike_stations_history[member.name][day] = {};
+
+    //         if (!bike_stations_history[member.name][day][hour])
+    //             bike_stations_history[member.name][day][hour] = {};
+
+    //         bike_stations_history[member.name][day][hour].available_bikes = value[1];
+    //         bike_stations_history[member.name][day][hour].available_bike_stands = value[2];
+    //     }
+    // }
 
     // console.log(JSON.stringify(bike_stations_history));
 }

@@ -5619,30 +5619,6 @@
         {
             "type": "Feature",
             "properties": {
-                "idstation": "10089",
-                "nom": "Colin /Ottavi",
-                "adresse1": "rue colin",
-                "adresse2": "",
-                "commune": "VILLEURBANNE",
-                "numdansarrondissement": "89",
-                "nbbornettes": "15",
-                "stationbonus": "Non",
-                "pole": "commerces, iti. Cyclable",
-                "ouverte": "Oui",
-                "achevement": "",
-                "gid": "235"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    4.874019027302294,
-                    45.774547945821375
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
                 "idstation": "5036",
                 "nom": "La Salette",
                 "adresse1": "Rue Commandant Charcot",
