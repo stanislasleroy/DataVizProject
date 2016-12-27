@@ -71,7 +71,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initial_zoom = 15;
+            var initial_zoom = 14;
             var current_zoom;
 
             // Temps de trajet théorique des différents lignes (ms)
@@ -128,6 +128,10 @@
                 if (!d3.select(e).attr("class")) {
                     selectedLine = "";
                     d3.selectAll('.train').each(function(d, i) {
+                        d3.select(this).classed("hiddenLine", false);
+                    });
+
+                    d3.selectAll('.pie').each(function(d, i) {
                         d3.select(this).classed("hiddenLine", false);
                     });
                 }
@@ -403,8 +407,6 @@
 
                 for (var line in nearby_bike_stations) {
 
-                    // console.log(line);
-
                     for (var bike_station_id in nearby_bike_stations[line]) {
 
                         var path5 = d3.geo.path().projection(transform);
@@ -434,6 +436,7 @@
                             .append("path")
                             .attr("id", "pie-velov-" + bike_station_id)
                             .classed("pie", true)
+                            .classed("p" + line, line)
                             .attr("fill", function(d, i) {
                                 return color(d.data.type);
                             })
@@ -522,7 +525,15 @@
                             d3.select(this).classed("hiddenLine", true);
                         });
 
+                        d3.selectAll('.pie').each(function(d, i) {
+                            d3.select(this).classed("hiddenLine", true);
+                        });
+
                         d3.selectAll('.train').filter(".t" + selectedLine).each(function(d, i) {
+                            d3.select(this).classed("hiddenLine", false);
+                        });
+
+                        d3.selectAll('.pie').filter(".p" + selectedLine).each(function(d, i) {
                             d3.select(this).classed("hiddenLine", false);
                         });
                     })
@@ -576,14 +587,14 @@
                                         .attr("journey", function() {
                                             return Object.keys(journeys)[index];
                                         })
-                                        // .classed("hiddenLine", function(d) {
-                                        //     if (selectedLine == "")
-                                        //         return false;
-                                        //     else if (d3.select(data).attr("code_titan") == selectedLine)
-                                        //         return false;
-                                        //     else
-                                        //         return true;
-                                        // })
+                                        .classed("hiddenLine", function(d) {
+                                            if (selectedLine == "")
+                                                return false;
+                                            else if (d3.select(data).attr("code_titan") == selectedLine)
+                                                return false;
+                                            else
+                                                return true;
+                                        })
                                         .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
                                         .transition()
                                         .duration(function() {
@@ -694,11 +705,11 @@
 
                                                                                 var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
                                                                                 // console.log("Offset : " + available_bikes_offset);
-                                                                                console.log(h[current_day][date_before.toLocaleTimeString()].available_bikes +
-                                                                                    "/" + h[current_day][date_before.toLocaleTimeString()].available_bike_stands +
-                                                                                    " =>" + h[current_day][date_after.toLocaleTimeString()].available_bikes +
-                                                                                    "/" + h[current_day][date_after.toLocaleTimeString()].available_bike_stands +
-                                                                                    " -> Offset : " + available_bikes_offset);
+                                                                                // console.log(h[current_day][date_before.toLocaleTimeString()].available_bikes +
+                                                                                //     "/" + h[current_day][date_before.toLocaleTimeString()].available_bike_stands +
+                                                                                //     " =>" + h[current_day][date_after.toLocaleTimeString()].available_bikes +
+                                                                                //     "/" + h[current_day][date_after.toLocaleTimeString()].available_bike_stands +
+                                                                                //     " -> Offset : " + available_bikes_offset);
 
 
                                                                                 // if (available_bikes_offset != 0) {
@@ -709,7 +720,7 @@
 
                                                                                 var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                                                                                var nb_circles = 0;
+                                                                                // var nb_circles = 0;
 
                                                                                 // var y = setInterval(function() {
 
