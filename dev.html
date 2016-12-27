@@ -51,7 +51,7 @@
 <body>
     <div>
         <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-        <span id="week">heure</span>
+        <span id="day">jour</span>
     </div>
     <div id="map">
 
@@ -102,8 +102,9 @@
             var stop_times = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-            // var current_day = "2016-11-21";
             var current_day = "2016-12-23";
+            // var current_day;
+            var available_days = [];
 
             // var map = L.map('map').setView([45.750000, 4.850000], initial_zoom);
             var map = L.map('map').setView([45.766000, 4.865000], initial_zoom);
@@ -155,7 +156,11 @@
             var tooltip = d3.select('body').append('div')
                 .attr('class', 'hidden tooltip');
 
-
+            d3.select("#slider").on("input", function() {
+            //    console.log(+this.value);
+               d3.select('#day').html(available_days[+this.value - 1]);
+            //    current_day = available_days[+this.value - 1];
+            });
 
             d3.queue()
                 .defer(d3.json, "tram.json")
@@ -521,14 +526,20 @@
                         // console.log(selectedLine);
                         //  console.log(d3.selectAll('.train').filter(".t" + selectedLine));
 
+                        // Masquer tous les éléments
                         d3.selectAll('.train').each(function(d, i) {
                             d3.select(this).classed("hiddenLine", true);
                         });
 
                         d3.selectAll('.pie').each(function(d, i) {
-                            d3.select(this).classed("hiddenLine", true);
+                            d3.select(this).classed("hiddenLine ", true);
                         });
 
+                        d3.selectAll('.ring').each(function(d, i) {
+                            d3.select(this).classed("hiddenLine ", true);
+                        });
+
+                        // Afficher les éléments sélectionnés
                         d3.selectAll('.train').filter(".t" + selectedLine).each(function(d, i) {
                             d3.select(this).classed("hiddenLine", false);
                         });
@@ -536,6 +547,25 @@
                         d3.selectAll('.pie').filter(".p" + selectedLine).each(function(d, i) {
                             d3.select(this).classed("hiddenLine", false);
                         });
+
+                        d3.selectAll('.ring').filter(".r" + selectedLine).each(function(d, i) {
+                            d3.select(this).classed("hiddenLine", false);
+                        });
+
+
+                    //     // Masquer tous les éléments
+                    //     d3.selectAll(".train").filter("*:not(" + ".r" + selectedLine + ")").each(function(d, i) {
+                    //         d3.select(this).classed("hiddenLine", true);
+                    //     });
+
+                    //    d3.selectAll(".pie").filter("*:not(" + ".p" + selectedLine + ")").each(function(d, i) {
+                    //         d3.select(this).classed("hiddenLine ", true);
+                    //     });
+
+                    //     d3.selectAll(".ring").filter("*:not(" + ".r" + selectedLine + ")").each(function(d, i) {
+                    //         d3.select(this).classed("hiddenLine ", true);
+                    //     });
+
                     })
                     .on('mouseout', function() {
                         d3.select(this).style("stroke-width", 4);
@@ -720,7 +750,7 @@
 
                                                                                 var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                                                                                // var nb_circles = 0;
+                                                                                var nb_circles = 0;
 
                                                                                 // var y = setInterval(function() {
 
@@ -730,13 +760,22 @@
                                                                                 //     // console.log(nb_circles);
                                                                                 //     g.append("circle")
                                                                                 //         .attr("class", "ring")
+                                                                                //         .classed("r" + selectedLine, selectedLine)
+                                                                                //         .classed("hiddenLine", function(d) {
+                                                                                //             if (selectedLine == "")
+                                                                                //                 return false;
+                                                                                //             else if (d3.select(data).attr("code_titan") == selectedLine)
+                                                                                //                 return false;
+                                                                                //             else
+                                                                                //                 return true;
+                                                                                //         })
                                                                                 //         .attr("transform", "translate(" + point.x + ", " + point.y + ")")
                                                                                 //         .attr("r", 6)
                                                                                 //         .style("stroke-width", 1)
                                                                                 //         .style("stroke", "red")
                                                                                 //         .transition()
                                                                                 //         .ease("linear")
-                                                                                //         .duration(6000)
+                                                                                //         .duration(1000)
                                                                                 //         .style("stroke-opacity", 1e-6)
                                                                                 //         .style("stroke-width", 1)
                                                                                 //         .style("stroke", "brown")

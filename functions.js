@@ -315,6 +315,9 @@ function loadBikeStationsHistory(history) {
             var day = value[0].substring(0, index_1);
             var hour = value[0].substring(index_1 + 1, index_2);
 
+            if(available_days.indexOf(day) == -1)
+                available_days.push(day);
+
             if (!bike_stations_history[id][day])
                 bike_stations_history[id][day] = {};
 
@@ -324,9 +327,12 @@ function loadBikeStationsHistory(history) {
             bike_stations_history[id][day][hour].available_bikes = value[1];
             bike_stations_history[id][day][hour].available_bike_stands = value[2];
         }
-
-
     }
+
+    // Paramétrage du slider
+    d3.select('#slider').attr("max", available_days.length);
+    d3.select('#day').html(available_days[0]);
+
 
     // for (var i = 0; i < history.ObservationCollection.member.length; i++) {
 
