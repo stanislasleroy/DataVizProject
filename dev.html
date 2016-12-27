@@ -71,7 +71,7 @@
             //var map = new L.Map("map", {center: [45.750000, 4.850000], zoom: 13})
             // .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
-            var initial_zoom = 14;
+            var initial_zoom = 15;
             var current_zoom;
 
             // Temps de trajet théorique des différents lignes (ms)
@@ -398,78 +398,85 @@
                 });
 
 
+                console.log(nearby_bike_stations);
 
 
-                for (var bike_station_id in nearby_bike_stations["301"]) {
+                for (var line in nearby_bike_stations) {
 
-                    var path5 = d3.geo.path().projection(transform);
+                    // console.log(line);
 
-                    var bike_station = nearby_bike_stations["301"][bike_station_id];
-                    var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+                    for (var bike_station_id in nearby_bike_stations[line]) {
 
-                    var width = 800,
-                        height = 250,
-                        radius = Math.min(width, height) / 2;
+                        var path5 = d3.geo.path().projection(transform);
 
-                    var color = d3.scale.category10();
+                        var bike_station = nearby_bike_stations[line][bike_station_id];
+                        var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                    var arc = d3.svg.arc()
-                        .outerRadius(30)
-                        .innerRadius(20);
+                        var width = 800,
+                            height = 250,
+                            radius = Math.min(width, height) / 2;
 
-                    var pie = d3.layout.pie()
-                        .sort(null)
-                        .value(function(d) {
-                            return d.number;
-                        });
+                        var color = d3.scale.category10();
 
-                    var feat = g.selectAll("piePath")
-                        .data(pie(data1))
-                        .enter()
-                        .append("path")
-                        .attr("id", "pie-velov-" + bike_station_id)
-                        .classed("pie", true)
-                        .attr("fill", function(d, i) {
-                            return color(d.data.type);
-                        })
-                        .attr("transform", "translate(" + point2.x + "," + point2.y + ")");
+                        var arc = d3.svg.arc()
+                            .outerRadius(30)
+                            .innerRadius(20);
 
-                    feat.transition()
-                        .duration(500)
-                        .attr("fill", function(d, i) {
-                            return color(d.data.type);
-                        })
-                        .attr("d", arc)
-                        .each(function(d) {
-                            this._current = d;
-                        }); // store the initial angles
+                        var pie = d3.layout.pie()
+                            .sort(null)
+                            .value(function(d) {
+                                return d.number;
+                            });
 
-                    // map.on("viewreset", function() {
-                    //     reset(path5, data1, feat);
-                    // });
+                        var feat = g.selectAll("piePath")
+                            .data(pie(data1))
+                            .enter()
+                            .append("path")
+                            .attr("id", "pie-velov-" + bike_station_id)
+                            .classed("pie", true)
+                            .attr("fill", function(d, i) {
+                                return color(d.data.type);
+                            })
+                            .attr("transform", "translate(" + point2.x + "," + point2.y + ")");
 
-                    // reset(path5, data1, feat);
+                        feat.transition()
+                            .duration(500)
+                            .attr("fill", function(d, i) {
+                                return color(d.data.type);
+                            })
+                            .attr("d", arc)
+                            .each(function(d) {
+                                this._current = d;
+                            }); // store the initial angles
+
+                        // map.on("viewreset", function() {
+                        //     reset(path5, data1, feat);
+                        // });
+
+                        // reset(path5, data1, feat);
 
 
-                    function change(_id, data) {
-                        p = d3.selectAll("#pie-velov-" +
-                            _id);
-                        p.data(pie(data));
-                        p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
-                    }
+                        function change(_id, data) {
+                            p = d3.selectAll("#pie-velov-" +
+                                _id);
+                            p.data(pie(data));
+                            p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
+                        }
 
-                    // Store the displayed angles in _current.
-                    // Then, interpolate from _current to the new angles.
-                    // During the transition, _current is updated in-place by d3.interpolate.
+                        // Store the displayed angles in _current.
+                        // Then, interpolate from _current to the new angles.
+                        // During the transition, _current is updated in-place by d3.interpolate.
 
-                    function arcTween(a) {
-                        var i = d3.interpolate(this._current, a);
-                        this._current = i(0);
-                        return function(t) {
-                            return arc(i(t));
-                        };
+                        function arcTween(a) {
+                            var i = d3.interpolate(this._current, a);
+                            this._current = i(0);
+                            return function(t) {
+                                return arc(i(t));
+                            };
+                        }
                     }
                 }
+
 
 
 
@@ -631,8 +638,8 @@
                                                             // Si la rame est proche de la station de Vélo'v
                                                             if (dist_to_bike_station < distanceToStation) {
 
-                                                                // if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
-                                                                if (d3.select(data).attr("code_titan") == "301") {
+                                                                if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
+                                                                    // if (d3.select(data).attr("code_titan") == "301") {
 
                                                                     var id = "velov-" + bike_station_id;
 
@@ -704,29 +711,29 @@
 
                                                                                 var nb_circles = 0;
 
-                                                                                var y = setInterval(function() {
+                                                                                // var y = setInterval(function() {
 
-                                                                                    if (nb_circles > Math.abs(available_bikes_offset))
-                                                                                        clearInterval(y);
+                                                                                //     if (nb_circles > Math.abs(available_bikes_offset))
+                                                                                //         clearInterval(y);
 
-                                                                                    // console.log(nb_circles);
-                                                                                    g.append("circle")
-                                                                                        .attr("class", "ring")
-                                                                                        .attr("transform", "translate(" + point.x + ", " + point.y + ")")
-                                                                                        .attr("r", 6)
-                                                                                        .style("stroke-width", 1)
-                                                                                        .style("stroke", "red")
-                                                                                        .transition()
-                                                                                        .ease("linear")
-                                                                                        .duration(6000)
-                                                                                        .style("stroke-opacity", 1e-6)
-                                                                                        .style("stroke-width", 1)
-                                                                                        .style("stroke", "brown")
-                                                                                        .attr("r", 50)
-                                                                                        .remove();
+                                                                                //     // console.log(nb_circles);
+                                                                                //     g.append("circle")
+                                                                                //         .attr("class", "ring")
+                                                                                //         .attr("transform", "translate(" + point.x + ", " + point.y + ")")
+                                                                                //         .attr("r", 6)
+                                                                                //         .style("stroke-width", 1)
+                                                                                //         .style("stroke", "red")
+                                                                                //         .transition()
+                                                                                //         .ease("linear")
+                                                                                //         .duration(6000)
+                                                                                //         .style("stroke-opacity", 1e-6)
+                                                                                //         .style("stroke-width", 1)
+                                                                                //         .style("stroke", "brown")
+                                                                                //         .attr("r", 50)
+                                                                                //         .remove();
 
-                                                                                    nb_circles++;
-                                                                                }, 750);
+                                                                                //     nb_circles++;
+                                                                                // }, 750);
 
 
                                                                                 // Si le  zoom est au niveau micro/local = 15
