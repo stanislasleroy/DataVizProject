@@ -826,6 +826,15 @@ function animateMetro() {
 
 function displayConcentricCircles() {
 
+    // Affichage des donut
+    var data1 = [{
+        "type": "available_bikes",
+        "number": 0
+    }, {
+        "type": "available_bike_stands",
+        "number": 20
+    }];
+
     for (var line in nearby_bike_stations) {
 
         for (var bike_station_id in nearby_bike_stations[line]) {
