@@ -3,32 +3,44 @@
 function reset(_path, _collection, _feature) {
 
     current_zoom = map.getZoom();
-    console.log("Current zoom = " + map.getZoom());
+    // console.log("Current zoom = " + map.getZoom());
 
     // if (current_zoom === 15) {
-    //     d3.selectAll('.pie').each(function(d, i) {
-    //         d3.select(this).classed("hidden", false);
-    //     });
+
+    //     console.log("Vue locale");
+    //     // d3.selectAll('.pie').each(function(d, i) {
+    //     //     d3.select(this).classed("hidden", false);
+    //     // });
+
+    //     displayConcentricCircles();
     // } else {
 
     //     d3.selectAll('.pie').each(function(d, i) {
-    //         d3.select(this).classed("hidden", true);
+    //         d3.select(this).remove();
     //     });
 
-    //     // if (current_zoom === 13 || current_zoom === 14) {
+    //     // d3.selectAll('.pie').each(function(d, i) {
+    //     //     d3.select(this).classed("hidden", true);
+    //     // });
 
-    //     // }
+    //     if (current_zoom === 13 || current_zoom === 14) {
+    //         console.log("Vue globale");
+    // }
     // }
 
-    var bounds = _path.bounds(_collection),
+    var bounds = __path__.bounds(_collection),
         topLeft = bounds[0],
         bottomRight = bounds[1];
+
+
+    // console.log(__path__.bounds(_collection));
+    // console.log(bottomRight);
 
     svg
         .attr("width", bottomRight[0] - topLeft[0])
         .attr("height", bottomRight[1] - topLeft[1])
-        .style("left", topLeft[0] + "px")
-        .style("top", topLeft[1] + "px");
+        .style("left", (topLeft[0]) + "px")
+        .style("top", (topLeft[1]) + "px");
     // .attr("width", "50000")
     // .attr("height", "50000")
     // .style("left", "0px")
@@ -38,31 +50,74 @@ function reset(_path, _collection, _feature) {
     // g.attr("transform", "translate(" + 0 + "," +
     // 0 + ")");
 
+    _feature.attr("d", __path__);
 
 
-    _feature.attr("d", _path);
+
+
+    d3.selectAll('.pie').each(function(d, i) {
+
+        // console.log(d3.select(this).attr("bike_station"));
+        var bike_station_id = d3.select(this).attr("bike_station");
+        var p = d3.select("#id_" + bike_station_id);
+        var node = p.node;
+        // d3.select(".b" + bike_station_id).each(function(d, i) {
+        //     console.log(d);
+        //     // console.log(d3.select(this).attr("id"));
+        // });
+        // console.log(d3.select("#id_" + bike_station_id));
+        // console.log(node);
+
+        console.log(d3.select(p.parentNode).attr("transform"));
+        // console.log(getTransform(node));
+
+        // console.log(d3.select(this).attr("transform"));
+        // d3.select(this).attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+        // d3.select(this).attr("transform", getTransform(d3.select("#id_" + bike_station_id)));
+    });
 }
 
-function getTransform(node) {
-    var p = node.getPointAtLength(0)
+function resetPie(_collection, _feature, point2) {
+
+    var bounds = __path__.bounds(_collection),
+        topLeft = bounds[0],
+        bottomRight = bounds[1];
+
+    console.log(_collection);
+
+
+    // svg
+    //     .attr("width", bottomRight[0] - topLeft[0])
+    //     .attr("height", bottomRight[1] - topLeft[1])
+    //     .style("left", (topLeft[0]) + "px")
+    //     .style("top", (topLeft[1]) + "px");
+
+    // g.attr("transform", "translate(" + point2.x + "," + point2.y + ")");
+    // g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+    _feature.attr("d", __path__);
+}
+
+function getTransform(_node) {
+    var p = _node.getPointAtLength(0)
     return "translate(" + [p.x, p.y] + ")";
 }
 
 // Use Leaflet to implement a D3 geometric transformation.
-function projectPoint(x, y) {
-    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+function projectPoint(_x, _y) {
+    var point = map.latLngToLayerPoint(new L.LatLng(_y, _x));
     this.stream.point(point.x, point.y);
 }
 
-function getDistance(lat1, lat2, lon1, lon2) {
+function getDistance(_lat1, _lat2, _lon1, _lon2) {
 
     var earthRadius = 6371000; //meters
 
-    var dLat = toRad(lat2 - lat1);
-    var dLng = toRad(lon2 - lon1);
+    var dLat = toRad(_lat2 - _lat1);
+    var dLng = toRad(_lon2 - _lon1);
 
     var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.cos(toRad(_lat1)) * Math.cos(toRad(_lat2)) *
         Math.sin(dLng / 2) * Math.sin(dLng / 2);
 
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -70,19 +125,19 @@ function getDistance(lat1, lat2, lon1, lon2) {
     return earthRadius * c;
 }
 
-function toRad(Value) {
-    return Value * Math.PI / 180;
+function toRad(_value) {
+    return _value * Math.PI / 180;
 }
 
 
 /*
  * Renvoie la liste des arrêts pour la ligne "line"
  */
-function getEffectiveStopPointsForJSON(line) {
+function getEffectiveStopPointsForJSON(_line) {
 
     result = [];
 
-    var journeyPattern = line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern;
+    var journeyPattern = _line.ChouettePTNetwork.ChouetteLineDescription.JourneyPattern;
 
     for (var i = 0; i < journeyPattern.length; i++) {
 
@@ -95,7 +150,6 @@ function getEffectiveStopPointsForJSON(line) {
             }
         }
     }
-    // console.log(result);
     return result;
 }
 
@@ -103,13 +157,13 @@ function getEffectiveStopPointsForJSON(line) {
 /*
  * Ajoute les points d'arrêts pour la ligne "line" dans l'objet global "stop_points"
  */
-function loadStopPoints(line, effective_stop_points) {
+function loadStopPoints(_line, effective_stop_points) {
 
-    var current_line = line.ChouettePTNetwork.PTNetwork.lineId.substring(line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
+    var current_line = _line.ChouettePTNetwork.PTNetwork.lineId.substring(_line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
     current_line = current_line.substring(0, 3);
 
 
-    var points = line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
+    var points = _line.ChouettePTNetwork.ChouetteLineDescription.StopPoint;
 
     for (var i = 0; i < points.length; i++) {
 
@@ -136,28 +190,26 @@ function loadStopPoints(line, effective_stop_points) {
             stop_points.features.push(newFeature);
         }
     }
-
-    // console.log(JSON.stringify(stop_points));
 }
 
 
 /*
  * Ajoute des horaires d'arrêts pour la ligne "line" dans l'objet global "stop_times"
  */
-function loadStopTimes(line) {
+function loadStopTimes(_line) {
 
-    var current_line = line.ChouettePTNetwork.PTNetwork.lineId.substring(line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
+    var current_line = _line.ChouettePTNetwork.PTNetwork.lineId.substring(_line.ChouettePTNetwork.PTNetwork.lineId.lastIndexOf(":") + 1);
     current_line = current_line.substring(0, 3);
 
     stop_times[current_line] = {};
 
     // Création d'un nouveau hash 
     // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
-    var vehicle_journey = getListVehicleJourney(line);
+    var vehicle_journey = getListVehicleJourney(_line);
 
 
     // Récupération des calendriers
-    var timetables = line.ChouettePTNetwork.Timetable;
+    var timetables = _line.ChouettePTNetwork.Timetable;
 
     for (var i = 0; i < timetables.length; i++) {
 
@@ -186,18 +238,18 @@ function loadStopTimes(line) {
 /*
  *
  */
-function getCalendars(periodStart, periodEnd, days_to_compare) {
+function getCalendars(_periodStart, _periodEnd, _days_to_compare) {
 
     var result = [];
 
-    for (var d = new Date(periodStart); d <= new Date(periodEnd); d.setDate(d.getDate() + 1)) {
+    for (var d = new Date(_periodStart); d <= new Date(_periodEnd); d.setDate(d.getDate() + 1)) {
 
-        if (Array.isArray(days_to_compare)) {
-            if (days_to_compare.indexOf(days[d.getDay()]) !== -1) {
+        if (Array.isArray(_days_to_compare)) {
+            if (_days_to_compare.indexOf(days[d.getDay()]) !== -1) {
                 result.push(formatDate(d));
             }
         } else {
-            if (days_to_compare === days[d.getDay()]) {
+            if (_days_to_compare === days[d.getDay()]) {
                 result.push(formatDate(d));
             }
         }
@@ -210,8 +262,8 @@ function getCalendars(periodStart, periodEnd, days_to_compare) {
 /*
  * Formatage de la date de la forme YYYY-MM-DD
  */
-function formatDate(date) {
-    var d = new Date(date),
+function formatDate(_date) {
+    var d = new Date(_date),
         month = '' + (d.getMonth() + 1),
         day = '' + d.getDate(),
         year = d.getFullYear();
@@ -226,12 +278,12 @@ function formatDate(date) {
 /*
  *
  */
-function getListVehicleJourney(line) {
+function getListVehicleJourney(_line) {
 
     var hash = {};
 
     // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
-    var vehicle_journeys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
+    var vehicle_journeys = _line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
 
     for (var i = 0; i < vehicle_journeys.length; i++) {
 
@@ -252,12 +304,12 @@ function getListVehicleJourney(line) {
 /*
  *
  */
-function getExtremitiesOfJourney(line) {
+function getExtremitiesOfJourney(_line) {
 
     var hash = {};
 
     // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
-    var vehicle_journeys = line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
+    var vehicle_journeys = _line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
 
     for (var i = 0; i < vehicle_journeys.length; i++) {
 
@@ -303,20 +355,20 @@ function getNearbyBikeStations() {
     }
 }
 
-function loadBikeStationsHistory(history) {
+function loadBikeStationsHistory(_history) {
 
     // console.log(history);
 
-    for (var id in history) {
+    for (var id in _history) {
 
         // console.log(history[id]["values"]);
 
         if (!bike_stations_history[id])
             bike_stations_history[id] = {};
 
-        for (var j = 0; j < history[id]["values"].length; j++) {
+        for (var j = 0; j < _history[id]["values"].length; j++) {
 
-            var value = history[id]["values"][j];
+            var value = _history[id]["values"][j];
 
             var index_1 = value[0].indexOf("T");
             var index_2 = value[0].indexOf("+");
@@ -374,12 +426,14 @@ function loadBikeStationsHistory(history) {
     // console.log(JSON.stringify(bike_stations_history));
 }
 
-function displaySecondaryLine(data, type) {
+function displaySecondaryLine(_data, _type) {
+
+    // console.log(_data);
 
     var path = d3.geo.path().projection(transform);
 
-    var feature = g.selectAll('.' + type)
-        .data(data)
+    var feature = g.selectAll('.' + _type)
+        .data(_data.features)
         .enter().append("path")
         .style({
             'fill-opacity': 0.0,
@@ -394,18 +448,18 @@ function displaySecondaryLine(data, type) {
         });
 
     map.on("viewreset", function() {
-        reset(path, data, feature);
+        reset(path, _data, feature);
     });
 
-    reset(path, data, feature);
+    reset(path, _data, feature);
 }
 
-function displayBikeStations(data) {
+function displayBikeStations(_data) {
 
     var path = d3.geo.path().projection(transform);
 
     var feature = g.selectAll('.pathVelov')
-        .data(data.features)
+        .data(_data.features)
         .enter().append("path")
         .classed("stationsVelo", true)
         .attr("id", function(d) {
@@ -430,19 +484,19 @@ function displayBikeStations(data) {
         });
 
     map.on("viewreset", function() {
-        reset(path, data, feature);
+        reset(path, _data, feature);
     });
 
-    reset(path, data, feature);
+    reset(path, _data, feature);
 }
 
 
-function displayMetroStations(data) {
+function displayMetroStations(_data) {
 
     var path = d3.geo.path().projection(transform);
 
     var feature = g.selectAll('.pathStationsMetro')
-        .data(data.features)
+        .data(_data.features)
         .enter().append("path")
         .classed("stationsMetro", true)
         .attr("id", function(d) {
@@ -469,19 +523,19 @@ function displayMetroStations(data) {
         });
 
     map.on("viewreset", function() {
-        reset(path, data, feature2);
+        reset(path, _data, feature);
     });
 
-    reset(path, data, feature);
+    reset(path, _data, feature);
 }
 
 
-function displayLineStations(data) {
+function displayLineStations(_data) {
 
     var path = d3.geo.path().projection(transform);
 
     var feature = g.selectAll('.pathMetroLine')
-        .data(data.features)
+        .data(_data.features)
         .enter().append("path")
         .classed("lineMetro", true)
         .attr("sens", function(d) {
@@ -561,14 +615,14 @@ function displayLineStations(data) {
         });
 
     map.on("viewreset", function() {
-        reset(path, data, feature);
+        reset(path, _data, feature);
     });
 
-    reset(path, data, feature);
+    reset(path, _data, feature);
 }
 
-function arcTween(a) {
-    var i = d3.interpolate(this._current, a);
+function arcTween(_a) {
+    var i = d3.interpolate(this._current, _a);
     this._current = i(0);
     return function(t) {
         return arc(i(t));
@@ -576,10 +630,13 @@ function arcTween(a) {
 }
 
 
-function change(_id, data) {
+function change(_id, _data) {
+
+    // console.log("Change");
+
     p = d3.selectAll("#pie-velov-" +
         _id);
-    p.data(pie(data));
+    p.data(pie(_data));
     p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
 }
 
@@ -838,30 +895,26 @@ function displayConcentricCircles() {
 
         for (var bike_station_id in nearby_bike_stations[line]) {
 
-            var path5 = d3.geo.path().projection(transform);
+            // var path = d3.geo.path().projection(transform);
 
             var bike_station = nearby_bike_stations[line][bike_station_id];
             var point2 = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-            var width = 800,
-                height = 250,
-                radius = Math.min(width, height) / 2;
-
-            var color = d3.scale.category10();
-
-            var feat = g.selectAll('.pathPie')
+            var feature = g.selectAll('.pathPie')
                 .data(pie(data1))
                 .enter()
                 .append("path")
                 .attr("id", "pie-velov-" + bike_station_id)
                 .classed("pie", true)
+                .attr("bike_station", bike_station_id)
                 .classed("p" + line, line)
+                .classed("" + line, line)
                 .attr("fill", function(d, i) {
                     return color(d.data.type);
                 })
                 .attr("transform", "translate(" + point2.x + "," + point2.y + ")");
 
-            feat.transition()
+            feature.transition()
                 .duration(500)
                 .attr("fill", function(d, i) {
                     return color(d.data.type);
@@ -872,10 +925,12 @@ function displayConcentricCircles() {
                 }); // store the initial angles
 
             // map.on("viewreset", function() {
-            //     reset(path5, data1, feat);
+            // reset(path, data1, feature);
             // });
 
-            // reset(path5, data1, feat);
+            // reset(path, data1, feature);
+
+            // resetPie(pie(data1), feature, point2);
         }
     }
 }

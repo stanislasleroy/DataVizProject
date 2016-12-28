@@ -133,6 +133,8 @@
             });
 
 
+            var __path__ = d3.geo.path().projection(transform);
+
             var svg = d3.select(map.getPanes().overlayPane)
                 .append("svg");
 
@@ -151,6 +153,8 @@
             var arc = d3.svg.arc()
                 .outerRadius(30)
                 .innerRadius(20);
+
+            var color = d3.scale.category10();
 
 
             d3.select("#slider").on("input", function() {
@@ -172,8 +176,7 @@
                 .defer(d3.json, "neptune/304.json")
                 .defer(d3.json, "neptune/325.json")
                 .defer(d3.json, "neptune/326.json")
-                // .defer(d3.json, "horaires/2012-12-23.json")
-                .defer(d3.json, "GetVelovHistory/history2.json")
+                .defer(d3.json, "GetVelovHistory/history4.json")
                 .defer(d3.json, "tram.json")
                 .defer(d3.json, "bus.json")
                 .awaitAll(displayPrimaryLine);
@@ -189,13 +192,16 @@
                 ///////////////
 
                 // Affichage des lignes de tram et de bus
-                displaySecondaryLine(files[10], "pathTram");
-                displaySecondaryLine(files[11], "pathBus");
+                console.log("Affichage des lignes secondaires");
+                // displaySecondaryLine(files[10], "pathTram");
+                // displaySecondaryLine(files[11], "pathBus");
 
                 // Affichage des lignes de Métro
+                console.log("Affichage des lignes de Métro");
                 displayLineStations(files[1]);
 
                 // Affichage des stations Vélo'v
+                console.log("Affichage des stations Vélo'v");
                 displayBikeStations(files[2]);
 
                 total_bike_stations = files[2];
@@ -238,10 +244,12 @@
                 }
 
                 // Recherche des stations Vélo'v voisines des stations de métro
+                console.log("Recherche des stations Vélo'v voisines");
                 getNearbyBikeStations();
 
                 // Affichage des stations de métro
-                displayMetroStations(stop_points);
+                console.log("ffichage des stations de métro");
+                // displayMetroStations(stop_points);
 
 
                 // Zoom
@@ -263,10 +271,11 @@
                 });
 
                 // Affichage des cercles concentriques
+                console.log("Affichage des cercles concentriques");
                 displayConcentricCircles();
 
                 // Animation des rames de métro
-                animateMetro();
+                // animateMetro();
             }
         </script>
 </body>
