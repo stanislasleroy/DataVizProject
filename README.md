@@ -8,6 +8,9 @@ Notre but est d'analyser au cours de la journée l’impact des arrivées des ra
 Stanislas LEROY & Colas PICARD
 Master 2 IA - Université Claude Bernard Lyon 1
 
+## Démo
+https://htmlpreview.github.io/?https://github.com/stanislasleroy/DataVizProject/blob/master/dev.html
+
 ## Sources des données
 * Localisation des stations Vélo’v :
 http://data.grandlyon.com/equipements/station-vflov/
