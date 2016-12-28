@@ -7,8 +7,8 @@
     <script src="d3-queue.v3.min.js"></script>
     <script src="leaflet.js">
     </script>
-    <script src="functions.js" type="text/javascript"></script>
-    <style>
+<script src="functions.js" type="text/javascript"></script>
+<style>
         body {
             margin: 0;
             position: fixed;
@@ -59,6 +59,10 @@
             var initial_zoom = 14;
             var current_zoom;
 
+            var bounds = __path__.bounds(_collection);
+            var topLeft = bounds[0];
+            var bottomRight = bounds[1];
+
             // Temps de trajet théorique des différents lignes (ms)
             var durationA = 1260000; // 21 minutes
             var durationB = 1020000; // 17 minutes
@@ -108,22 +112,22 @@
             }).addTo(map);
 
             // Affichage des lignes de métro cachées
-            map.on('click', function(d) {
+            map.on('click', function (d) {
                 var e = d.originalEvent.path[0];
 
                 if (!d3.select(e).attr("class")) {
                     selectedLine = "";
-                    d3.selectAll('.train').each(function(d, i) {
+                    d3.selectAll('.train').each(function (d, i) {
                         d3.select(this).classed("hiddenLine", false);
                     });
 
-                    d3.selectAll('.pie').each(function(d, i) {
+                    d3.selectAll('.pie').each(function (d, i) {
                         d3.select(this).classed("hiddenLine", false);
                     });
                 }
             })
 
-            map.on('zoomend', function() {
+            map.on('zoomend', function () {
                 console.log(map.getZoom());
             });
 
@@ -146,7 +150,7 @@
 
             var pie = d3.layout.pie()
                 .sort(null)
-                .value(function(d) {
+                .value(function (d) {
                     return d.number;
                 });
 
@@ -156,8 +160,10 @@
 
             var color = d3.scale.category10();
 
+            var needReset = true;
 
-            d3.select("#slider").on("input", function() {
+
+            d3.select("#slider").on("input", function () {
                 //    console.log(+this.value);
                 d3.select('#day').html(available_days[+this.value - 1]);
                 //    current_day = available_days[+this.value - 1];
@@ -254,7 +260,7 @@
 
                 // Zoom
                 var zoom = d3.behavior.zoom()
-                    .on("zoom", function() {
+                    .on("zoom", function () {
 
                         console.log("Zoom");
                         // g.attr("transform", "translate(" +
@@ -266,7 +272,7 @@
                         //     .attr("d", path.projection(projection));
                     });
 
-                map.on('zoomend', function() {
+                map.on('zoomend', function () {
                     console.log("Zoom");
                 });
 
