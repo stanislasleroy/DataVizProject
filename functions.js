@@ -826,7 +826,6 @@ function animateMetro() {
 
 function displayConcentricCircles() {
 
-    // Affichage des donut
     var data1 = [{
         "type": "available_bikes",
         "number": 0
@@ -850,17 +849,6 @@ function displayConcentricCircles() {
 
             var color = d3.scale.category10();
 
-            // var arc = d3.svg.arc()
-            //     .outerRadius(30)
-            //     .innerRadius(20);
-
-            // var pie = d3.layout.pie()
-            //     .sort(null)
-            //     .value(function(d) {
-            //         return d.number;
-            //     });
-
-            // var feat = g.selectAll("piePath")
             var feat = g.selectAll('.pathPie')
                 .data(pie(data1))
                 .enter()
@@ -888,26 +876,6 @@ function displayConcentricCircles() {
             // });
 
             // reset(path5, data1, feat);
-
-            // function change(_id, data) {
-            //     p = d3.selectAll("#pie-velov-" +
-            //         _id);
-            //     p.data(pie(data));
-            //     p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
-            // }
-
-
-            // Store the displayed angles in _current.
-            // Then, interpolate from _current to the new angles.
-            // During the transition, _current is updated in-place by d3.interpolate.
-
-            // function arcTween(a) {
-            //     var i = d3.interpolate(this._current, a);
-            //     this._current = i(0);
-            //     return function(t) {
-            //         return arc(i(t));
-            //     };
-            // }
         }
     }
 }
