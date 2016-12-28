@@ -148,12 +148,8 @@
             });
 
 
-            // var path = d3.geo.path().projection(transform);
-
             var svg = d3.select(map.getPanes().overlayPane)
                 .append("svg");
-            // .attr("width", '100%')
-            // .attr("height", '100%')
 
             var g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
@@ -166,11 +162,8 @@
                 //    current_day = available_days[+this.value - 1];
             });
 
-
             // map.on("viewreset")();
             // map.fireEvent('viewreset');
-
-
 
             d3.queue()
                 .defer(d3.json, "point_arret.json")
@@ -247,36 +240,13 @@
                     }
                 }
 
-                /*
-                 * Affichage des stations Métro
-                 */
-
                 var effective_stop_points;
 
-                effective_stop_points = getEffectiveStopPointsForJSON(files[3]);
-                loadStopPoints(files[3], effective_stop_points);
-                loadStopTimes(files[3], effective_stop_points);
-
-                effective_stop_points = getEffectiveStopPointsForJSON(files[4]);
-                loadStopPoints(files[4], effective_stop_points);
-                loadStopTimes(files[4]);
-
-                effective_stop_points = getEffectiveStopPointsForJSON(files[5]);
-                loadStopPoints(files[5], effective_stop_points);
-                loadStopTimes(files[5]);
-
-                effective_stop_points = getEffectiveStopPointsForJSON(files[6]);
-                loadStopPoints(files[6], effective_stop_points);
-                loadStopTimes(files[6]);
-
-                effective_stop_points = getEffectiveStopPointsForJSON(files[7]);
-                loadStopPoints(files[7], effective_stop_points);
-                loadStopTimes(files[7]);
-
-                effective_stop_points = getEffectiveStopPointsForJSON(files[8]);
-                loadStopPoints(files[8], effective_stop_points);
-                loadStopTimes(files[8]);
-
+                for (var i = 3; i < 9; i++) {
+                    effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
+                    loadStopPoints(files[i], effective_stop_points);
+                    loadStopTimes(files[i], effective_stop_points);
+                }
 
                 getNearbyBikeStations();
 
