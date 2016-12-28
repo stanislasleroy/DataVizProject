@@ -24,12 +24,21 @@ function reset(_path, _collection, _feature) {
         topLeft = bounds[0],
         bottomRight = bounds[1];
 
-    svg.attr("width", bottomRight[0] - topLeft[0])
+    svg
+        .attr("width", bottomRight[0] - topLeft[0])
         .attr("height", bottomRight[1] - topLeft[1])
         .style("left", topLeft[0] + "px")
         .style("top", topLeft[1] + "px");
+    // .attr("width", "50000")
+    // .attr("height", "50000")
+    // .style("left", "0px")
+    // .style("top", "0px");
 
     g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+    // g.attr("transform", "translate(" + 0 + "," +
+    // 0 + ")");
+
+
 
     _feature.attr("d", _path);
 }
@@ -296,7 +305,7 @@ function getNearbyBikeStations() {
 
 function loadBikeStationsHistory(history) {
 
-    console.log(history);
+    // console.log(history);
 
     for (var id in history) {
 
@@ -315,7 +324,7 @@ function loadBikeStationsHistory(history) {
             var day = value[0].substring(0, index_1);
             var hour = value[0].substring(index_1 + 1, index_2);
 
-            if(available_days.indexOf(day) == -1)
+            if (available_days.indexOf(day) == -1)
                 available_days.push(day);
 
             if (!bike_stations_history[id][day])
@@ -363,4 +372,197 @@ function loadBikeStationsHistory(history) {
     // }
 
     // console.log(JSON.stringify(bike_stations_history));
+}
+
+function displaySecondaryLine(data, type) {
+
+    var path = d3.geo.path().projection(transform);
+
+    var feature = g.selectAll('.' + type)
+        .data(data)
+        .enter().append("path")
+        .style({
+            'fill-opacity': 0.0,
+            'stroke-width': 1,
+            'stroke-linejoin': 'round',
+            'stroke-linecap': 'round'
+        })
+        .style("stroke", function(d) {
+            var array = d.properties.couleur.split(" ");
+            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+            return color;
+        });
+
+    map.on("viewreset", function() {
+        reset(path, data, feature);
+    });
+
+    reset(path, data, feature);
+}
+
+function displayBikeStations(data) {
+
+    var path = d3.geo.path().projection(transform);
+
+    var feature = g.selectAll('.pathVelov')
+        .data(data.features)
+        .enter().append("path")
+        .classed("stationsVelo", true)
+        .attr("id", function(d) {
+            return "id_" + d.properties.idstation;
+        })
+        .style("stroke", "black")
+        .style("fill", function(d) {
+            return d.properties.stationbonus === "Oui" ? "#FFBF00" : "#d3d3d3";
+        })
+        .on('mouseover', function(d) {
+            var mouse = d3.mouse(svg.node()).map(function(d) {
+                return parseInt(d);
+            });
+            tooltip.classed('hidden', false)
+                .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+                .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
+            d3.select(this).style("stroke", "red");
+        })
+        .on('mouseout', function() {
+            tooltip.classed('hidden', true);
+            d3.select(this).style("stroke", "black");
+        });
+
+    map.on("viewreset", function() {
+        reset(path, data, feature);
+    });
+
+    reset(path, data, feature);
+}
+
+
+function displayMetroStations(data) {
+
+    var path = d3.geo.path().projection(transform);
+
+    var feature = g.selectAll('.pathStationsMetro')
+        .data(data.features)
+        .enter().append("path")
+        .classed("stationsMetro", true)
+        .attr("id", function(d) {
+            return d.properties.id;
+        })
+        .style({
+            'stroke-width': 4,
+            'stroke-linejoin': 'round',
+            'stroke-linecap': 'round'
+        })
+        .style("stroke", function(d) {
+            return "gray";
+            var id = d.properties.desserte.substring(0, 3);
+            var array = details_line[id].color.split(" ");
+            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+            return color;
+        })
+        .style("fill", function(d) {
+            return "gray";
+            var id = d.properties.desserte.substring(0, 3);
+            var array = details_line[id].color.split(" ");
+            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+            return color;
+        });
+
+    map.on("viewreset", function() {
+        reset(path, data, feature2);
+    });
+
+    reset(path, data, feature);
+}
+
+
+function displayLineStations(data) {
+
+    var path = d3.geo.path().projection(transform);
+
+    var feature = g.selectAll('.pathMetroLine')
+        .data(data.features)
+        .enter().append("path")
+        .classed("lineMetro", true)
+        .attr("sens", function(d) {
+            return d.properties.sens;
+        })
+        .attr("ligne", function(d) {
+            return d.properties.ligne;
+        })
+        .attr("code_titan", function(d) {
+            return d.properties.code_titan.substring(0, 3);
+        })
+        .style({
+            'fill': 'none'
+        })
+        .style({
+            'stroke-width': 4,
+            'stroke-linejoin': 'round',
+            'stroke-linecap': 'round'
+        })
+        .style("stroke", function(d) {
+            var array = d.properties.couleur.split(" ");
+            var color = (d3.rgb(array[0], array[1], array[2])).toString();
+            return color;
+        })
+        .on('mousemove', function(d) {
+            d3.select(this).style("stroke-width", 8);
+        })
+        .on('click', function(d) {
+            d3.select(this).style("stroke-width", 8);
+            selectedLine = d.properties.code_titan.substring(0, 3);
+            // console.log(selectedLine);
+            //  console.log(d3.selectAll('.train').filter(".t" + selectedLine));
+
+            // Masquer tous les éléments
+            d3.selectAll('.train').each(function(d, i) {
+                d3.select(this).classed("hiddenLine", true);
+            });
+
+            d3.selectAll('.pie').each(function(d, i) {
+                d3.select(this).classed("hiddenLine ", true);
+            });
+
+            d3.selectAll('.ring').each(function(d, i) {
+                d3.select(this).classed("hiddenLine ", true);
+            });
+
+            // Afficher les éléments sélectionnés
+            d3.selectAll('.train').filter(".t" + selectedLine).each(function(d, i) {
+                d3.select(this).classed("hiddenLine", false);
+            });
+
+            d3.selectAll('.pie').filter(".p" + selectedLine).each(function(d, i) {
+                d3.select(this).classed("hiddenLine", false);
+            });
+
+            d3.selectAll('.ring').filter(".r" + selectedLine).each(function(d, i) {
+                d3.select(this).classed("hiddenLine", false);
+            });
+
+
+            //     // Masquer tous les éléments
+            //     d3.selectAll(".train").filter("*:not(" + ".r" + selectedLine + ")").each(function(d, i) {
+            //         d3.select(this).classed("hiddenLine", true);
+            //     });
+
+            //    d3.selectAll(".pie").filter("*:not(" + ".p" + selectedLine + ")").each(function(d, i) {
+            //         d3.select(this).classed("hiddenLine ", true);
+            //     });
+
+            //     d3.selectAll(".ring").filter("*:not(" + ".r" + selectedLine + ")").each(function(d, i) {
+            //         d3.select(this).classed("hiddenLine ", true);
+            //     });
+
+        })
+        .on('mouseout', function() {
+            d3.select(this).style("stroke-width", 4);
+        });
+
+    map.on("viewreset", function() {
+        reset(path, data, feature);
+    });
+
+    reset(path, data, feature);
 }
