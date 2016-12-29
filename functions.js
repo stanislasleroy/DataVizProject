@@ -781,64 +781,50 @@ function animateMetro() {
                                                                 //     " -> Offset : " + available_bikes_offset);
 
 
-                                                                // if (available_bikes_offset != 0) {
-                                                                // if (available_bikes_offset < 0 && current_station_id == "velov-6004") {
+                                                                if (available_bikes_offset != 0) {
+                                                                    // if (available_bikes_offset < 0 && current_station_id == "velov-6004") {
 
-                                                                // Si le zoom est au niveau macro/global = 13/14
-                                                                // Cercles concentriques sur les stations de Vélo'v
+                                                                    var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
 
-                                                                var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
+                                                                    var nb_circles = 0;
 
-                                                                var nb_circles = 0;
+                                                                    console.log("To do : " + Math.abs(available_bikes_offset));
+                                                                    var y = setInterval(function () {
 
-                                                                // var y = setInterval(function() {
+                                                                        if (nb_circles > Math.abs(available_bikes_offset))
+                                                                            clearInterval(y);
 
-                                                                //     if (nb_circles > Math.abs(available_bikes_offset))
-                                                                //         clearInterval(y);
+                                                                        // console.log(nb_circles);
+                                                                        g.append("circle")
+                                                                            .attr("class", "ring")
+                                                                            .classed("r" + selectedLine, selectedLine)
+                                                                            .classed("hiddenLine", function (d) {
+                                                                                if (selectedLine == "")
+                                                                                    return false;
+                                                                                else if (d3.select(data).attr("code_titan") == selectedLine)
+                                                                                    return false;
+                                                                                else
+                                                                                    return true;
+                                                                            })
+                                                                            .attr("transform", "translate(" + point.x + ", " + point.y + ")")
+                                                                            .attr("r", 6)
+                                                                            .style("stroke-width", 1)
+                                                                            .style("stroke", "red")
+                                                                            .transition()
+                                                                            .ease("linear")
+                                                                            .duration(1000)
+                                                                            .style("stroke-opacity", 1e-6)
+                                                                            .style("stroke-width", 1)
+                                                                            .style("stroke", "brown")
+                                                                            .attr("r", 50)
+                                                                            .remove();
 
-                                                                //     // console.log(nb_circles);
-                                                                //     g.append("circle")
-                                                                //         .attr("class", "ring")
-                                                                //         .classed("r" + selectedLine, selectedLine)
-                                                                //         .classed("hiddenLine", function(d) {
-                                                                //             if (selectedLine == "")
-                                                                //                 return false;
-                                                                //             else if (d3.select(data).attr("code_titan") == selectedLine)
-                                                                //                 return false;
-                                                                //             else
-                                                                //                 return true;
-                                                                //         })
-                                                                //         .attr("transform", "translate(" + point.x + ", " + point.y + ")")
-                                                                //         .attr("r", 6)
-                                                                //         .style("stroke-width", 1)
-                                                                //         .style("stroke", "red")
-                                                                //         .transition()
-                                                                //         .ease("linear")
-                                                                //         .duration(1000)
-                                                                //         .style("stroke-opacity", 1e-6)
-                                                                //         .style("stroke-width", 1)
-                                                                //         .style("stroke", "brown")
-                                                                //         .attr("r", 50)
-                                                                //         .remove();
-
-                                                                //     nb_circles++;
-                                                                // }, 750);
-
-
-                                                                // Si le  zoom est au niveau micro/local = 15
-                                                                // Affichage de camemberts
-                                                                // }
-
+                                                                        nb_circles++;
+                                                                    }, 750);
+                                                                }
                                                             }
-                                                            // }
                                                         }
                                                     }
-
-                                                    // d3.select("path#id_" + bike_station_id).style("stroke-width", "5")
-                                                    //     .transition()
-                                                    //     // .delay(1000)
-                                                    //     .duration(500)
-                                                    //     .style("stroke-width", "1");
                                                 }
                                             }
                                         }
