@@ -489,21 +489,12 @@ function displayBikeStations(_data) {
             return d.properties.stationbonus === "Oui" ? "#FFBF00" : "#d3d3d3";
         })
         .on('mouseover', function(d) {
-            var mouse = d3.mouse(svg.node()).map(function(d) {
+            var mouse = d3.mouse(g.node()).map(function(d) {
                 return parseInt(d);
             });
 
-            // console.log(mouse[0] + " ; " + mouse[1]);
-            // var coord = map.layerPointToLatLng(L.point(mouse[0], mouse[1]));
-            // console.log(coord);
-            // console.log(coord.lat);
-            // console.log(coord.lng);
-            // var p = latLngToLayerPoint(L.latLng(coord.lat, coord.lng));
-            // console.log(p);
-            // console.log(t);
-
             tooltip.classed('hidden', false)
-                .attr('style', 'left:' + (mouse[0]) + 'px; top:' + (mouse[1]) + 'px')
+                .attr('style', 'left:' + (mouse[0] + 10) + 'px; top:' + (mouse[1] + 10) + 'px')
                 .html(d.properties.nom + "<br>Id station : " + d.properties.idstation + "<br>Nb de bornes : " + d.properties.nbbornettes + "<br>Station bonus : " + d.properties.stationbonus);
             d3.select(this).style("stroke", "red");
         })
@@ -696,7 +687,7 @@ function animateMetro() {
 
             var interval = setInterval(function() {
 
-                console.log(continue_draw_trains);
+                // console.log(continue_draw_trains);
 
                 if (!continue_draw_trains)
                     clearInterval(interval);
