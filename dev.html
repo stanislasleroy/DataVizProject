@@ -45,14 +45,54 @@
             fill: none;
             stroke: #c7141a;
         }
+        
+        .wrap {
+            text-align: center;
+            margin-bottom: 15px;
+            margin-top: 15px;
+        }
+        
+        .left {
+            float: left;
+            margin-top: 15px;
+        }
+        
+        .right {
+            float: right;
+            margin-top: 15px;
+        }
+        
+        .center {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 18px;
+            margin: 0 auto !important;
+            display: inline-block;
+        }
+        
+        img {
+            vertical-align: middle;
+        }
     </style>
 </head>
 
 <body>
-    <div>
-        <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-        <span id="day"></span>
+    <div class="wrap">
+        <div class="left">
+            <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+            <span id="day"></span>
+        </div>
+        <div class="right">
+            <span id="hour">hour</span>
+        </div>
+        <div class="center">
+            <img src="img/bike.png" alt="Smiley face" height="40" width="40">
+            <img src="img/plus.png" alt="Smiley face" height="20" width="20">
+            <img src="img/metro.png" alt="Smiley face" height="45" width="45"> Visualisation de l'impact des arrivées de rames sur les stations Vélo'v
+        </div>
+
+
     </div>
+
     <div id="map">
 
         <script>
