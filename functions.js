@@ -696,7 +696,14 @@ function animateMetro() {
 
                             d3.select('#hour').html("test");
 
-                            console.log(journeys);
+                            // console.log(journeys);
+                            var key = Object.keys(journeys)[index];
+                            console.log(journeys[key]);
+
+                            var key2 = Object.keys(journeys[key])[0];
+                            console.log(journeys[key][key2]);
+                            d3.select('#hour').html(journeys[key][key2]);
+
 
                             var pathLengthN = data.getTotalLength();
                             var actived = true;
@@ -708,6 +715,7 @@ function animateMetro() {
                                 .attr('fill-opacity', 0.5)
                                 .classed("train", true)
                                 .attr("journey", function() {
+                                    // console.log(Object.keys(journeys)[index]);
                                     return Object.keys(journeys)[index];
                                 })
                                 .classed("hiddenLine", function(d) {
