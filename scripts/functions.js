@@ -2,19 +2,53 @@
 
 function reset(_path, _collection, _feature) {
 
-    // console.log("current_zoom : " + current_zoom);
-    // console.log("map.getZoom: " + map.getZoom());
-
     if (current_zoom > map.getZoom()) {
         zoom_factor *= 2;
     } else if (current_zoom < map.getZoom()) {
         zoom_factor /= 2;
     }
 
+    // console.log(zoom_factor);
+
+
+    /* 
+     * Mise à jour des durées des rames si modification du zoom
+     * Non fonctionnel
+     */
+
+    // if (current_zoom != map.getZoom()) {
+
+    //     d3.selectAll('.train').each(function(d, i) {
+
+    //         var current_train = d3.select(this);
+    //         var line = d3.select(this).attr("line");
+
+    //         var duration = 0;
+
+    //         if (line == "301")
+    //             duration = durationA / (divider * zoom_factor);
+    //         else if (line == "201")
+    //             duration = durationB / (divider * zoom_factor);
+    //         else if (line == "303")
+    //             duration = durationC / (divider * zoom_factor);
+    //         else if (line == "304")
+    //             duration = durationD / (divider * zoom_factor);
+    //         else if (line == "F1")
+    //             duration = durationD / (divider * zoom_factor);
+    //         else if (line == "F2")
+    //             duration = durationD / (divider * zoom_factor);
+
+    //         console.log("New duration : " + duration);
+    //         current_train.transition().duration(duration);
+    //     });
+    // }
+
     var bounds = __path__.bounds(_collection);
     var topLeft = bounds[0];
     var bottomRight = bounds[1];
 
+
+    // Affichage ou masquage des pie charts (donuts) en fonction du zoom
     d3.selectAll('.pie').each(function(d, i) {
 
         var bike_station_id = d3.select(this).attr("bike_station");
@@ -32,6 +66,7 @@ function reset(_path, _collection, _feature) {
         }
     });
 
+    // Affichage ou masquage des cercles concentriques en fonction du zoom
     d3.selectAll('.ring').each(function(d, i) {
 
         if (map.getZoom() >= 15) {
@@ -187,9 +222,8 @@ function loadStopTimes(_line) {
         }
     }
 
-    // console.log(JSON.stringify(stop_times));
-    // console.log(Object.keys(stop_times[current_line]).length);
-    console.log(stop_times);
+    console.log(JSON.stringify(stop_times));
+    // console.log(stop_times);
 
 }
 
@@ -261,7 +295,7 @@ function getListVehicleJourney(_line) {
 }
 
 /*
- *
+ * Non utilisé
  */
 function getExtremitiesOfJourney(_line) {
 
@@ -383,9 +417,13 @@ function loadBikeStationsHistory(_history) {
     // }
 
     // console.log(JSON.stringify(bike_stations_history));
-    console.log(bike_stations_history)
+    // console.log(bike_stations_history)
 }
 
+
+/*
+ * Affichage des lignes secondaires
+ */
 function displaySecondaryLine(_data, _type) {
 
     // console.log(_data);
@@ -414,6 +452,9 @@ function displaySecondaryLine(_data, _type) {
     reset(path, _data, feature);
 }
 
+/*
+ * Affichage des stations Vélo'v
+ */
 function displayBikeStations(_data) {
 
     var path = d3.geo.path().projection(transform);
@@ -452,6 +493,9 @@ function displayBikeStations(_data) {
 }
 
 
+/*
+ * Affichage des stations de métro
+ */
 function displayMetroStations(_data) {
 
     var path = d3.geo.path().projection(transform);
@@ -490,8 +534,10 @@ function displayMetroStations(_data) {
     reset(path, _data, feature);
 }
 
-
-function displayLineStations(_data) {
+/*
+ * Affichage des stations de métro
+ */
+function displayMetroLines(_data) {
 
     var path = d3.geo.path().projection(transform);
 
@@ -605,7 +651,9 @@ function change(_id, _data) {
 }
 
 
-
+/*
+ * Création et animation des rames de métro
+ */
 function animateMetro() {
 
     var nodes = d3.selectAll('.lineMetro')[0];
@@ -624,8 +672,6 @@ function animateMetro() {
 
             var index = 0;
 
-            // console.log("delay_between_metro : " + )
-
             var interval = setInterval(function() {
 
                     // console.log(continue_draw_trains);
@@ -638,14 +684,14 @@ function animateMetro() {
                             console.log("Arrêt des métros");
                         } else {
 
-                            d3.select('#hour').html("test");
-
                             // console.log(journeys);
                             var key = Object.keys(journeys)[index];
                             // console.log(journeys[key]);
 
                             var key2 = Object.keys(journeys[key])[0];
                             // console.log(journeys[key][key2]);
+
+                            // Mise à jour de l'affichage de l'heure
                             d3.select('#hour').html(journeys[key][key2].slice(0, 5));
 
 
@@ -658,6 +704,7 @@ function animateMetro() {
                                 .attr("transform", getTransform(data))
                                 .attr('fill-opacity', 0.5)
                                 .classed("train", true)
+                                .attr("line", current_line)
                                 .attr("journey", function() {
                                     // console.log(Object.keys(journeys)[index]);
                                     return Object.keys(journeys)[index];
@@ -681,6 +728,10 @@ function animateMetro() {
                                         return durationC / (divider * zoom_factor);
                                     else if (d3.select(data).attr("ligne") == "D")
                                         return durationD / (divider * zoom_factor);
+                                    else if (d3.select(data).attr("ligne") == "F1")
+                                        return durationF1 / (divider * zoom_factor);
+                                    else if (d3.select(data).attr("ligne") == "F2")
+                                        return durationF2 / (divider * zoom_factor);
                                     else
                                         return duration / zoom_factor;
                                 })
@@ -853,6 +904,9 @@ function animateMetro() {
                     }
                     // }, delay_between_metro);
                 },
+                // Tentative de moduler la fréquence des rames de métro
+                // pour montrer l'évolution du nombre de rames entre le matin/soir et en journée (pics).
+                // Mais setInterval() ne permet pas de modifier la durée de l'interval de façon dynamique
                 getDelayBetweenMetro());
         }
     });
@@ -922,7 +976,7 @@ function displayDonuts() {
 
 function getDelayBetweenMetro() {
 
-    console.log("delay_between_metro : " + delay_between_metro);
+    // console.log("delay_between_metro : " + delay_between_metro);
 
     return delay_between_metro;
 }

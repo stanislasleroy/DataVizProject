@@ -2,13 +2,13 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="leaflet.css" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="d3.v3.min.js"></script>
-    <script src="d3-queue.v3.min.js"></script>
-    <script src="d3-legend.js"></script>
-    <script src="leaflet.js" type="text/javascript"></script>
-    <script src="functions.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="style/leaflet.css" />
+    <link rel="stylesheet" href="style/style.css" />
+    <script src="scripts/d3.v3.min.js"></script>
+    <script src="scripts/d3-queue.v3.min.js"></script>
+    <script src="scripts/d3-legend.js"></script>
+    <script src="scripts/leaflet.js" type="text/javascript"></script>
+    <script src="scripts/functions.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -41,6 +41,8 @@
             var durationB = 1020000; // 17 minutes
             var durationC = 540000; // 9 minutes
             var durationD = 1500000; // 25 minutes
+            var durationF1 = 200000; // 3m20s
+            var durationF2 = 120000; // 2 minutes
             var duration = 10000;
 
             // var divider  = 1000;
@@ -147,9 +149,9 @@
             });
 
             d3.queue()
-                .defer(d3.json, "point_arret.json")
-                .defer(d3.json, "ligne_metro.json")
-                .defer(d3.json, "stations.json")
+                .defer(d3.json, "data/point_arret.json")
+                .defer(d3.json, "data/ligne_metro.json")
+                .defer(d3.json, "data/stations.json")
                 .defer(d3.json, "neptune/301.json")
                 .defer(d3.json, "neptune/302.json")
                 .defer(d3.json, "neptune/303.json")
@@ -157,8 +159,8 @@
                 .defer(d3.json, "neptune/325.json")
                 .defer(d3.json, "neptune/326.json")
                 .defer(d3.json, "GetVelovHistory/history4.json")
-                .defer(d3.json, "tram.json")
-                .defer(d3.json, "bus.json")
+                .defer(d3.json, "data/tram.json")
+                .defer(d3.json, "data/bus.json")
                 .awaitAll(displayPrimaryLine);
 
 
@@ -169,7 +171,7 @@
 
                 // Affichage des lignes de Métro
                 console.log("Affichage des lignes de Métro");
-                displayLineStations(files[1]);
+                displayMetroLines(files[1]);
 
                 // Affichage des stations Vélo'v
                 console.log("Affichage des stations Vélo'v");
