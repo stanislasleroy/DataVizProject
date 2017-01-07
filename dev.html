@@ -46,8 +46,10 @@
             var duration = 10000;
 
             // var divider  = 1000;
-            var divider = 100;
-            var delay_between_metro = 2000;
+            var divider = 1000;
+            // var delay_between_metro = 2000;
+            // var delay_between_metro = 1000;
+            var delay_between_metro = 500;
             // var delay_between_metro = 500; // milliseconds
             // var ring_interval = 500;
             var ring_interval = 250;
@@ -68,6 +70,7 @@
             var bike_stations_history = {};
 
             var stop_times = {};
+            var stop_times_hash = {};
             var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
             var current_day = "2016-12-23";
@@ -210,8 +213,8 @@
 
                 var effective_stop_points;
 
-                // for (var i = 3; i < 9; i++) {
-                for (var i = 5; i < 6; i++) {
+                for (var i = 3; i < 9; i++) {
+                    // for (var i = 5; i < 6; i++) {
                     effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
                     loadStopPoints(files[i], effective_stop_points);
                     loadStopTimes(files[i], effective_stop_points);
