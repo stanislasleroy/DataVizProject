@@ -3,67 +3,38 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
     <script src="d3.v3.min.js"></script>
     <script src="d3-queue.v3.min.js"></script>
-    <script src="leaflet.js">
-    </script>
+    <script src="d3-legend.js"></script>
+    <script src="leaflet.js" type="text/javascript"></script>
     <script src="functions.js" type="text/javascript"></script>
-    <style>
-        body {
-            margin: 0;
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-        }
-        
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        div.tooltip {
-            color: #222;
-            background-color: #fff;
-            padding: .5em;
-            text-shadow: #f5f5f5 0 1px 0;
-            border-radius: 2px;
-            opacity: 0.9;
-            position: absolute;
-        }
-        
-        .hiddenLine {
-            display: none;
-        }
-        
-        .ring {
-            fill: none;
-            stroke: #c7141a;
-        }
-    </style>
 </head>
 
 <body>
-    <div>
-        <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-        <span id="day"></span>
+    <div class="wrap">
+        <div class="left">
+            <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+            <span id="day"></span>
+        </div>
+        <div class="right">
+            <span id="hour"></span>
+        </div>
+        <div class="center">
+            <img src="img/bike.png" height="40" width="40">
+            <img src="img/plus.png" height="20" width="20">
+            <img src="img/metro.png" height="45" width="45"> Visualisation de l'impact des arrivées de rames de métro sur les stations Vélo'v
+        </div>
     </div>
+
     <div id="map">
 
         <script>
             var initial_zoom = 14;
-            var current_zoom;
+            var current_zoom = initial_zoom;
+            var zoom_factor = 1;
 
             var needReset = true;
-
-            // var bounds; //= __path__.bounds(_collection);
-            // var topLeft; //= bounds[0];
-            // var bottomRight; // = bounds[1];
 
             // Temps de trajet théorique des différents lignes (ms)
             var durationA = 1260000; // 21 minutes
@@ -103,14 +74,7 @@
 
             var continue_draw_trains = true;
 
-            // var map = L.map('map').setView([45.750000, 4.850000], initial_zoom);
             var map = L.map('map').setView([45.766000, 4.865000], initial_zoom);
-
-            // var map = new L.Map("map", {
-            //         center: [45.750000, 4.850000],
-            //         zoom: initial_zoom
-            //     })
-            //     .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
 
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -138,15 +102,9 @@
                 }
             })
 
-            // map.on('zoomend', function() {
-            //     console.log(map.getZoom());
-            // });
-
-
             var transform = d3.geo.transform({
                 point: projectPoint
             });
-
 
             var __path__ = d3.geo.path().projection(transform);
 
@@ -172,8 +130,6 @@
             var color = d3.scale.category10();
 
 
-
-
             d3.select("#slider").on("input", function() {
                 //    console.log(+this.value);
                 d3.select('#day').html(available_days[+this.value - 1]);
@@ -186,11 +142,9 @@
                 });
 
                 continue_draw_trains = true;
+                details_line = {};
                 animateMetro(available_days[+this.value - 1]);
             });
-
-            // map.on("viewreset")();
-            // map.fireEvent('viewreset');
 
             d3.queue()
                 .defer(d3.json, "point_arret.json")
@@ -212,15 +166,6 @@
              * Affichage des lignes de métro et des stations
              */
             function displayPrimaryLine(error, files) {
-
-                ///////////////
-                // Partie fixe
-                ///////////////
-
-                // Affichage des lignes de tram et de bus
-                console.log("Affichage des lignes secondaires");
-                displaySecondaryLine(files[10], "pathTram");
-                displaySecondaryLine(files[11], "pathBus");
 
                 // Affichage des lignes de Métro
                 console.log("Affichage des lignes de Métro");
@@ -263,7 +208,8 @@
 
                 var effective_stop_points;
 
-                for (var i = 3; i < 9; i++) {
+                // for (var i = 3; i < 9; i++) {
+                for (var i = 5; i < 6; i++) {
                     effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
                     loadStopPoints(files[i], effective_stop_points);
                     loadStopTimes(files[i], effective_stop_points);
@@ -274,27 +220,16 @@
                 getNearbyBikeStations();
 
                 // Affichage des stations de métro
-                console.log("ffichage des stations de métro");
-                // displayMetroStations(stop_points);
+                console.log("Affichage des stations de métro");
+                displayMetroStations(stop_points);
 
-
-                // Zoom
-                var zoom = d3.behavior.zoom()
-                    .on("zoom", function() {
-
-                        console.log("Zoom");
-                        // g.attr("transform", "translate(" +
-                        //     d3.event.translate.join(",") + ")scale(" + d3.event.scale + ")");
-                        // g.selectAll("circle")
-                        //     .attr("d", path.projection(projection))
-                        //     .attr("r", 5 / zoom.scale());
-                        // g.selectAll("path")
-                        //     .attr("d", path.projection(projection));
-                    });
-
-                map.on('zoomend', function() {
-                    console.log("Zoom");
-                });
+                // Affichage des lignes de tram et de bus
+                // Placé à la fin pour augmenter la taille du svg, 
+                // sinon le svg est borné par les lignes de métro
+                // si l'affichage des lignes secondaires est en amont
+                console.log("Affichage des lignes secondaires");
+                displaySecondaryLine(files[10], "pathTram");
+                displaySecondaryLine(files[11], "pathBus");
 
                 // Affichage des cercles concentriques
                 console.log("Affichage des cercles concentriques");
