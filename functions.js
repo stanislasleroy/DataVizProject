@@ -2,32 +2,18 @@
 
 function reset(_path, _collection, _feature) {
 
+    // console.log("current_zoom : " + current_zoom);
+    // console.log("map.getZoom: " + map.getZoom());
+
+    if (current_zoom > map.getZoom()) {
+        zoom_factor *= 2;
+    } else if (current_zoom < map.getZoom()) {
+        zoom_factor /= 2;
+    }
+
     var bounds = __path__.bounds(_collection);
     var topLeft = bounds[0];
     var bottomRight = bounds[1];
-
-
-    // if (!current_zoom) {
-    //     console.log("Pas besoin de recaluler");
-    //     bounds = __path__.bounds(_collection);
-    //     topLeft = bounds[0];
-    //     bottomRight = bounds[1];
-
-    //     current_zoom = map.getZoom();
-    // } else {
-    //     console.log(current_zoom);
-    //     console.log(map.getZoom());
-    //     // Pas besoin de recalculer les limites
-    //     if (current_zoom == map.getZoom()) {
-
-    //         if (needReset) {
-    //             bounds = __path__.bounds(_collection);
-    //             topLeft = bounds[0];
-    //             bottomRight = bounds[1];
-    //         } else
-    //             console.log("Pas besoin de recaluler");
-    //     }
-    // }
 
     d3.selectAll('.pie').each(function(d, i) {
 
@@ -37,7 +23,6 @@ function reset(_path, _collection, _feature) {
         var bike_station = nearby_bike_stations[line][bike_station_id];
         var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
         d3.select(this).attr("transform", "translate(" + point.x + "," + point.y + ")");
-        // d3.select(this).moveToBack();
 
         if (map.getZoom() >= 15) {
             d3.select(this).classed("hiddenLine", false);
@@ -49,16 +34,6 @@ function reset(_path, _collection, _feature) {
 
     d3.selectAll('.ring').each(function(d, i) {
 
-        // console.log(d3.select(this));
-
-        // var bike_station_id = d3.select(this).attr("bike_station");
-        // var line = d3.select(this).attr("line");
-
-        // var bike_station = nearby_bike_stations[line][bike_station_id];
-        // var point = map.latLngToLayerPoint(new L.LatLng(bike_station.latitude, bike_station.longitude));
-        // d3.select(this).attr("transform", "translate(" + point.x + "," + point.y + ")");
-        // // d3.select(this).moveToBack();
-
         if (map.getZoom() >= 15) {
             d3.select(this).classed("hiddenLine", false);
 
@@ -67,48 +42,16 @@ function reset(_path, _collection, _feature) {
         }
     });
 
-
-    // if (map.getZoom() >= 15) {
-    //     console.log("Update settings");
-    //     delay_between_metro = 2000;
-    //     divider = 100;
-    // }
-    // else {
-    //     d3.select(this).classed("hiddenLine ", true);
-    // }
-
-
-    // if (map.getZoom() >= 15) {
-    //     d3.selectAll('.ring').each(function (d, i) {
-    //         d3.select(this).classed("hiddenLine ", true);
-    //     });
-    // }
-
-
-
-    // var bounds = __path__.bounds(_collection),
-    //     topLeft = bounds[0],
-    //     bottomRight = bounds[1];
-
-
-    // console.log(__path__.bounds(_collection));
-    // console.log(bottomRight);
-
-    svg
-        .attr("width", bottomRight[0] - topLeft[0])
+    svg.attr("width", bottomRight[0] - topLeft[0])
         .attr("height", bottomRight[1] - topLeft[1])
         .style("left", (topLeft[0]) + "px")
         .style("top", (topLeft[1]) + "px");
-    // .attr("width", "50000")
-    // .attr("height", "50000")
-    // .style("left", "0px")
-    // .style("top", "0px");
 
-    g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-    // g.attr("transform", "translate(" + 0 + "," +
-    // 0 + ")");
+    g.attr("transform", "translate(" + (-topLeft[0]) + "," + (-topLeft[1]) + ")");
 
     _feature.attr("d", __path__);
+
+    current_zoom = map.getZoom();
 }
 
 function getTransform(_node) {
@@ -122,6 +65,7 @@ function projectPoint(_x, _y) {
     this.stream.point(point.x, point.y);
 }
 
+// Retourne la distance entre 2 points (lat,lon)
 function getDistance(_lat1, _lat2, _lon1, _lon2) {
 
     var earthRadius = 6371000; //meters
@@ -207,7 +151,7 @@ function loadStopPoints(_line, effective_stop_points) {
 
 
 /*
- * Ajoute des horaires d'arrêts pour la ligne "line" dans l'objet global "stop_times"
+ * Ajoute des horaires d'arrêts pour la ligne "-_line" dans l'objet global "stop_times"
  */
 function loadStopTimes(_line) {
 
@@ -245,7 +189,7 @@ function loadStopTimes(_line) {
 
     // console.log(JSON.stringify(stop_times));
     // console.log(Object.keys(stop_times[current_line]).length);
-    // console.log(stop_times);
+    console.log(stop_times);
 
 }
 
@@ -520,19 +464,19 @@ function displayMetroStations(_data) {
             return d.properties.id;
         })
         .style({
-            'stroke-width': 4,
+            'stroke-width': 2,
             'stroke-linejoin': 'round',
             'stroke-linecap': 'round'
         })
         .style("stroke", function(d) {
-            return "gray";
+            return "black";
             var id = d.properties.desserte.substring(0, 3);
             var array = details_line[id].color.split(" ");
             var color = (d3.rgb(array[0], array[1], array[2])).toString();
             return color;
         })
         .style("fill", function(d) {
-            return "gray";
+            return "white";
             var id = d.properties.desserte.substring(0, 3);
             var array = details_line[id].color.split(" ");
             var color = (d3.rgb(array[0], array[1], array[2])).toString();
@@ -698,14 +642,14 @@ function animateMetro() {
 
                             // console.log(journeys);
                             var key = Object.keys(journeys)[index];
-                            console.log(journeys[key]);
+                            // console.log(journeys[key]);
 
                             var key2 = Object.keys(journeys[key])[0];
-                            console.log(journeys[key][key2]);
-                            d3.select('#hour').html(journeys[key][key2]);
+                            // console.log(journeys[key][key2]);
+                            d3.select('#hour').html(journeys[key][key2].slice(0, 5));
 
 
-                            var pathLengthN = data.getTotalLength();
+                            var path_length_n = data.getTotalLength();
                             var actived = true;
 
                             var circle = g.append("circle")
@@ -730,39 +674,38 @@ function animateMetro() {
                                 .transition()
                                 .duration(function() {
                                     if (d3.select(data).attr("ligne") == "A")
-                                        return durationA / divider;
+                                        return durationA / (divider * zoom_factor);
                                     else if (d3.select(data).attr("ligne") == "B")
-                                        return durationB / divider;
+                                        return durationB / (divider * zoom_factor);
                                     else if (d3.select(data).attr("ligne") == "C")
-                                        return durationC / divider;
+                                        return durationC / (divider * zoom_factor);
                                     else if (d3.select(data).attr("ligne") == "D")
-                                        return durationD / divider;
+                                        return durationD / (divider * zoom_factor);
                                     else
-                                        return duration;
+                                        return duration / zoom_factor;
                                 })
                                 .ease("linear")
                                 .remove()
                                 .attrTween("transform", function(d, i) {
+
                                     return function(t) {
 
                                         var p;
 
                                         if (d3.select(data).attr("sens") == "Aller")
-                                            p = data.getPointAtLength(pathLengthN * t);
+                                            p = data.getPointAtLength(path_length_n * t);
                                         else
-                                            p = data.getPointAtLength(pathLengthN - pathLengthN * t);
+                                            p = data.getPointAtLength(path_length_n - path_length_n * t);
 
                                         var coord = map.layerPointToLatLng(L.point(p.x, p.y));
 
                                         var code_titan = d3.select(data).attr("code_titan");
                                         var scale = 1;
 
-                                        // for (var key in details_line[code_titan]["stops"]) {
                                         for (var key in stop_points.features) {
 
                                             var value = stop_points.features[key];
 
-                                            // var dist = getDistance(value.geo.y, coord.lat, value.geo.x, coord.lng);
                                             var dist_to_metro_station = getDistance(value.geometry.coordinates[1], coord.lat, value.geometry.coordinates[0], coord.lng);
 
                                             // Si la rame est proche d'une station de métro
@@ -782,7 +725,6 @@ function animateMetro() {
 
                                                         if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
                                                             // if (d3.select(data).attr("code_titan") == "301") {
-
 
                                                             var id = "velov-" + bike_station_id;
 
@@ -810,6 +752,8 @@ function animateMetro() {
                                                                     var date_before;
                                                                     var date_after;
 
+                                                                    // Intervalle de 5 minutes
+                                                                    // [t+0 ; t+5] ou [ t-5 ; t+0]
                                                                     if (passage_date < rounded) {
                                                                         date_before = new Date(rounded.getTime() - 5 * 60000);
                                                                         date_after = rounded;
@@ -833,13 +777,6 @@ function animateMetro() {
 
 
                                                                         var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
-                                                                        // console.log("Offset : " + available_bikes_offset);
-                                                                        // console.log(h[current_day][date_before.toLocaleTimeString()].available_bikes +
-                                                                        //     "/" + h[current_day][date_before.toLocaleTimeString()].available_bike_stands +
-                                                                        //     " =>" + h[current_day][date_after.toLocaleTimeString()].available_bikes +
-                                                                        //     "/" + h[current_day][date_after.toLocaleTimeString()].available_bike_stands +
-                                                                        //     " -> Offset : " + available_bikes_offset);
-                                                                        //  console.log(current_station_id);
 
                                                                         if (available_bikes_offset < 0) {
                                                                             // if (available_bikes_offset < 0 && current_station_id == "6004") {
@@ -855,13 +792,10 @@ function animateMetro() {
 
                                                                             // if (map.getZoom() < 15) {
                                                                             var y = setInterval(function() {
-                                                                                // console.log("    y :" + y);
-
                                                                                 // console.log("    nb_circles : " + nb_circles + "/" + available_bikes_offset);
                                                                                 // console.log(nb_circles + "/" + available_bikes_offset);
 
                                                                                 if (nb_circles > Math.abs(available_bikes_offset)) {
-                                                                                    // console.log("    " + "clear !");
                                                                                     clearInterval(y);
                                                                                 } else {
                                                                                     // console.log(nb_circles);
@@ -948,6 +882,10 @@ function displayDonuts() {
                 .append("path")
                 .attr("id", "pie-velov-" + bike_station_id)
                 .attr("line", line)
+                // .attr("data-legend", "test")
+                // .style("fill", function(d, i) {
+                //     return color(d.data.type);
+                // })
                 .classed("hiddenLine", function() {
                     if (map.getZoom() >= 15)
                         return false;
@@ -971,9 +909,15 @@ function displayDonuts() {
                 .attr("d", arc)
                 .each(function(d) {
                     this._current = d;
-                }); // store the initial angles
+                }); // enregistre l'angle initial
         }
     }
+
+    // legend = svg.append("g")
+    //     .attr("class", "legend")
+    //     .attr("transform", "translate(500,300)")
+    //     .style("font-size", "12px")
+    //     .call(d3.legend);
 }
 
 function getDelayBetweenMetro() {
