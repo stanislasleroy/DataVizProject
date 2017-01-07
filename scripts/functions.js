@@ -199,9 +199,13 @@ function loadStopTimes(_line) {
     // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
     var vehicle_journey = getListVehicleJourney(_line);
 
+    console.log(vehicle_journey);
+
 
     // Récupération des calendriers
     var timetables = _line.ChouettePTNetwork.Timetable;
+
+    console.log(timetables);
 
     for (var i = 0; i < timetables.length; i++) {
 
@@ -216,13 +220,37 @@ function loadStopTimes(_line) {
             var current_date = calendar[j];
             stop_times[current_line][current_date] = {};
 
+            stop_times[current_line][current_date]["ALLER"] = {};
+
+            stop_times[current_line][current_date]["RETOUR"] = {};
+
+            // journeyPatternId
+            // TCL:JourneyPattern:303_17_1_3916V_22
+            // si entier à 26e position = 1, sens = ALLER
+            // Sinon sens = RETOUR
+            // var value = journey.journeyPatternId.slice(26, 27);
+            // var sens;
+
             for (var k = 0; k < timetables[i].vehicleJourneyId.length; k++) {
-                stop_times[current_line][current_date][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
+
+                // console.log(vehicle_journey[timetables[i].vehicleJourneyId[k]]);
+                // console.log(timetables[i].vehicleJourneyId[k]);
+
+                var value = timetables[i].vehicleJourneyId[k].slice(26, 27);
+                // console.log(value);
+
+                var sens;
+                if (value == 1)
+                    sens = "ALLER";
+                else if (value == 2)
+                    sens = "RETOUR";
+
+                stop_times[current_line][current_date][sens][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
             }
         }
     }
 
-    console.log(JSON.stringify(stop_times));
+    // console.log(JSON.stringify(stop_times));
     // console.log(stop_times);
 
 }
@@ -274,6 +302,8 @@ function formatDate(_date) {
 function getListVehicleJourney(_line) {
 
     var hash = {};
+    // hash["ALLER"] = {};
+    // hash["RETOUR"] = {};
 
     // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
     var vehicle_journeys = _line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
@@ -282,15 +312,30 @@ function getListVehicleJourney(_line) {
 
         var journey = vehicle_journeys[i];
 
+        // journeyPatternId
+        // TCL:JourneyPattern:303_17_1_3916V_22
+        // si entier à 26e position = 1, sens = ALLER
+        // Sinon sens = RETOUR
+        // var value = journey.journeyPatternId.slice(26, 27);
+        // var sens;
+
+        // if (value == 1)
+        //     sens = "ALLER";
+        // else if (value == 2)
+        //     sens = "RETOUR";
+
+        // hash[sens][journey.objectId] = {};
         hash[journey.objectId] = {};
 
         for (var j = 0; j < journey.vehicleJourneyAtStop.length; j++) {
             var stop = journey.vehicleJourneyAtStop[j];
             var id = stop.stopPointId.substring(stop.stopPointId.lastIndexOf(":") + 1);
+            // hash[sens][journey.objectId][id] = stop.arrivalTime;
             hash[journey.objectId][id] = stop.arrivalTime;
         }
     }
 
+    // console.log(hash);
     return hash;
 }
 
@@ -665,8 +710,12 @@ function animateMetro() {
         var nb_stations = [];
 
         var current_line = d3.select(data).attr("code_titan");
+        var sens = d3.select(data).attr("sens").toUpperCase();;
 
         if (stop_times[current_line]) {
+
+            console.log(data);
+            console.log("Sens : " + sens);
 
             var journeys = stop_times[current_line][current_day];
 
@@ -679,20 +728,22 @@ function animateMetro() {
                     if (!continue_draw_trains)
                         clearInterval(interval);
                     else {
-                        if (index >= Object.keys(journeys).length) {
+                        if (index >= Object.keys(journeys[sens]).length) {
                             clearInterval(interval);
                             console.log("Arrêt des métros");
                         } else {
 
-                            // console.log(journeys);
-                            var key = Object.keys(journeys)[index];
-                            // console.log(journeys[key]);
+                            console.log(journeys);
+                            console.log(journeys[sens]);
+                            var key = Object.keys(journeys[sens])[index];
+                            console.log(key);
+                            console.log(journeys[sens][key]);
 
-                            var key2 = Object.keys(journeys[key])[0];
+                            var key2 = Object.keys(journeys[sens][key])[0];
                             // console.log(journeys[key][key2]);
 
                             // Mise à jour de l'affichage de l'heure
-                            d3.select('#hour').html(journeys[key][key2].slice(0, 5));
+                            d3.select('#hour').html(journeys[sens][key][key2].slice(0, 5));
 
 
                             var path_length_n = data.getTotalLength();
@@ -707,7 +758,7 @@ function animateMetro() {
                                 .attr("line", current_line)
                                 .attr("journey", function() {
                                     // console.log(Object.keys(journeys)[index]);
-                                    return Object.keys(journeys)[index];
+                                    return Object.keys(journeys[sens])[index];
                                 })
                                 .classed("hiddenLine", function(d) {
                                     if (selectedLine == "")
@@ -789,8 +840,8 @@ function animateMetro() {
                                                                     var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
                                                                     // if (current_station_id == "7606") {
 
-                                                                    var journey_id = Object.keys(journeys)[index];
-                                                                    var journey = journeys[journey_id];
+                                                                    var journey_id = Object.keys(journeys[sens])[index];
+                                                                    var journey = journeys[sens][journey_id];
 
                                                                     var passage_time = journey[current_station_id];
                                                                     var passage_date = new Date(current_day + "T" + passage_time);
