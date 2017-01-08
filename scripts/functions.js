@@ -196,16 +196,9 @@ function loadStopTimes(_line) {
     stop_times[current_line] = {};
     stop_times_hash[current_line] = {};
 
-
-
     // Création d'un nouveau hash 
     // { VehicleJourneyId -> {vehicleJourneyAtStop -> arrivalTime} }
     var vehicle_journey = getListVehicleJourney(_line);
-
-    // var array = [];
-
-    // console.log(vehicle_journey);
-
 
     // Récupération des calendriers
     var timetables = _line.ChouettePTNetwork.Timetable;
@@ -227,15 +220,10 @@ function loadStopTimes(_line) {
             stop_times[current_line][current_date] = {};
             stop_times_hash[current_line][current_date] = {};
 
-            // stop_times[current_line][current_date]["ALLER"] = {};
-            // stop_times[current_line][current_date]["RETOUR"] = {};
-
             // journeyPatternId
             // TCL:JourneyPattern:303_17_1_3916V_22
             // si entier à 26e position = 1, sens = ALLER
             // Sinon sens = RETOUR
-            // var value = journey.journeyPatternId.slice(26, 27);
-            // var sens;
 
             for (var k = 0; k < timetables[i].vehicleJourneyId.length; k++) {
                 var array_temp = [];
@@ -243,16 +231,17 @@ function loadStopTimes(_line) {
 
                 // for (var l = 0; l < vehicle_journey[timetables[i].vehicleJourneyId[k]].length; l++) {
                 for (var v in vehicle_journey[timetables[i].vehicleJourneyId[k]]) {
-                    // console.log(v);
-                    // console.log(vehicle_journey[timetables[i].vehicleJourneyId[k]][v]);
                     array_temp.push(vehicle_journey[timetables[i].vehicleJourneyId[k]][v]);
                 }
-                // console.log(array_temp);
+
                 array_temp.sort();
-
-
                 var departure_time = array_temp[0];
-                var value = timetables[i].vehicleJourneyId[k].slice(26, 27);
+
+                // "TCL:VehicleJourney:303_15_1_390AV_221003"
+                // "TCL:VehicleJourney:304_6_1_011AV_031002"
+
+                var strings = timetables[i].vehicleJourneyId[k].split("_");
+                value = strings[2];
 
                 var sens;
                 if (value == 1)
@@ -269,17 +258,6 @@ function loadStopTimes(_line) {
                 if (!stop_times_hash[current_line][current_date][sens])
                     stop_times_hash[current_line][current_date][sens] = {};
 
-                // console.log(stop_times[current_line][current_date][sens]);
-
-                // var arr = stop_times[current_line][current_date][sens];
-
-                // if (arr.length == 0)
-                // stop_times[current_line][current_date][sens] = [];
-
-                // console.log(stop_times[current_line][current_date][sens]);
-
-                // array.push({ "id": timetables[i].vehicleJourneyId[k], "departure_time": departure_time });
-
                 if (!stop_times_hash[current_line][current_date][sens][timetables[i]])
                     stop_times_hash[current_line][current_date][sens][timetables[i]] = {};
 
@@ -287,23 +265,17 @@ function loadStopTimes(_line) {
                     stop_times_hash[current_line][current_date][sens][timetables[i].vehicleJourneyId[k]] = {};
 
                 stop_times_hash[current_line][current_date][sens][timetables[i].vehicleJourneyId[k]] = vehicle_journey[timetables[i].vehicleJourneyId[k]];
-                // stop_times[current_line][current_date][sens][timetables[i].vehicleJourneyId[k]] = departure_time;
-
-
-
 
                 stop_times[current_line][current_date][sens].push({ "id": timetables[i].vehicleJourneyId[k], "departure_time": departure_time });
-                stop_times[current_line][current_date][sens].sort(compare);
             }
-
-            // console.log(stop_times);
         }
     }
 
-    // console.log(JSON.stringify(stop_times));
-    // console.log(stop_times);
-    // console.log(array);
-
+    // Tri du tableau contenant les voyages
+    for (var prop in stop_times[current_line]) {
+        stop_times[current_line][prop]["ALLER"].sort(compare);
+        stop_times[current_line][prop]["RETOUR"].sort(compare);
+    }
 }
 
 // Fonction de comparaison des horaires
@@ -318,6 +290,7 @@ function compare(a, b) {
         if (a.departure_time > b.departure_time)
             return 1;
         return 0;
+        w
     } else {
 
         if ((a.departure_time <= "04:00:00" && b.departure_time > "04:00:00")) {
@@ -376,8 +349,6 @@ function formatDate(_date) {
 function getListVehicleJourney(_line) {
 
     var hash = {};
-    // hash["ALLER"] = {};
-    // hash["RETOUR"] = {};
 
     // Parcourt des stopTimes pour les affecter aux vehicleJourneyId
     var vehicle_journeys = _line.ChouettePTNetwork.ChouetteLineDescription.VehicleJourney;
@@ -386,30 +357,15 @@ function getListVehicleJourney(_line) {
 
         var journey = vehicle_journeys[i];
 
-        // journeyPatternId
-        // TCL:JourneyPattern:303_17_1_3916V_22
-        // si entier à 26e position = 1, sens = ALLER
-        // Sinon sens = RETOUR
-        // var value = journey.journeyPatternId.slice(26, 27);
-        // var sens;
-
-        // if (value == 1)
-        //     sens = "ALLER";
-        // else if (value == 2)
-        //     sens = "RETOUR";
-
-        // hash[sens][journey.objectId] = {};
         hash[journey.objectId] = {};
 
         for (var j = 0; j < journey.vehicleJourneyAtStop.length; j++) {
             var stop = journey.vehicleJourneyAtStop[j];
             var id = stop.stopPointId.substring(stop.stopPointId.lastIndexOf(":") + 1);
-            // hash[sens][journey.objectId][id] = stop.arrivalTime;
             hash[journey.objectId][id] = stop.arrivalTime;
         }
     }
 
-    // console.log(hash);
     return hash;
 }
 
@@ -692,8 +648,6 @@ function displayMetroLines(_data) {
         .on('click', function(d) {
             d3.select(this).style("stroke-width", 8);
             selectedLine = d.properties.code_titan.substring(0, 3);
-            // console.log(selectedLine);
-            //  console.log(d3.selectAll('.train').filter(".t" + selectedLine));
 
             // Masquer tous les éléments
             d3.selectAll('.train').each(function(d, i) {
@@ -761,10 +715,7 @@ function arcTween(_a) {
 
 function change(_id, _data) {
 
-    // console.log("Change");
-
-    p = d3.selectAll("#pie-velov-" +
-        _id);
+    p = d3.selectAll("#pie-velov-" + _id);
     p.data(pie(_data));
     p.transition().duration(500).attrTween("d", arcTween); // redraw the arcs
 }
@@ -777,19 +728,21 @@ function animateMetro() {
 
     var nodes = d3.selectAll('.lineMetro')[0];
 
+    console.log("stop_times : ");
+    console.log(stop_times);
+
     nodes.forEach(function(data, i) {
 
         var nb_stations_rencontrees = 0;
-
         var nb_stations = [];
 
         var current_line = d3.select(data).attr("code_titan");
-        var sens = d3.select(data).attr("sens").toUpperCase();;
+
+        // if (current_line === "303") {
+
+        var sens = d3.select(data).attr("sens").toUpperCase();
 
         if (stop_times[current_line]) {
-
-            // console.log(data);
-            // console.log("Sens : " + sens);
 
             var journeys = stop_times[current_line][current_day];
 
@@ -802,31 +755,20 @@ function animateMetro() {
                     if (!continue_draw_trains)
                         clearInterval(interval);
                     else {
-                        // if (index >= Object.keys(journeys[sens]).length) {
                         if (index >= journeys[sens].length) {
                             clearInterval(interval);
                             console.log("Arrêt des métros");
                         } else {
-                            // if (sens == "RETOUR") {
+
+                            // if (sens == "ALLER") {
                             if (sens == "ALLER" || sens == "RETOUR") {
 
-                                // console.log(journeys);
-                                // console.log(journeys[sens]);
                                 var journey_id = journeys[sens][index]["id"];
                                 var departure_time = journeys[sens][index]["departure_time"];
-                                // console.log(journey_id);
-                                // console.log(departure_time);
-
-                                // var key = Object.keys(journeys[sens])[index];
-                                // var key = Object.keys(journeys[sens])[index];
-                                // console.log(journeys[sens][key]);
-
-                                // var key2 = Object.keys(journeys[sens][key])[0];
-                                // console.log(journeys[key][key2]);
 
                                 // Mise à jour de l'affichage de l'heure
-                                // d3.select('#hour').html(journeys[sens][key][key2].slice(0, 5));
-                                d3.select('#hour').html(departure_time.slice(0, 5));
+                                if (sens == "ALLER" && current_line === "304")
+                                    d3.select('#hour').html(departure_time.slice(0, 5));
 
                                 var path_length_n = data.getTotalLength();
                                 var actived = true;
@@ -838,11 +780,7 @@ function animateMetro() {
                                     .attr('fill-opacity', 0.5)
                                     .classed("train", true)
                                     .attr("line", current_line)
-                                    .attr("journey", function() {
-                                        // console.log(Object.keys(journeys)[index]);
-                                        // return Object.keys(journeys[sens])[index];
-                                        return journey_id;
-                                    })
+                                    .attr("journey", journey_id)
                                     .classed("hiddenLine", function(d) {
                                         if (selectedLine == "")
                                             return false;
@@ -855,19 +793,26 @@ function animateMetro() {
                                     .transition()
                                     .duration(function() {
                                         if (d3.select(data).attr("ligne") == "A")
-                                            return durationA / (divider * zoom_factor);
+                                        // return durationA / (divider * zoom_factor);
+                                            return durationA / divider;
                                         else if (d3.select(data).attr("ligne") == "B")
-                                            return durationB / (divider * zoom_factor);
+                                        // return durationB / (divider * zoom_factor);
+                                            return durationB / divider;
                                         else if (d3.select(data).attr("ligne") == "C")
-                                            return durationC / (divider * zoom_factor);
+                                        // return durationC / (divider * zoom_factor);
+                                            return durationC / divider;
                                         else if (d3.select(data).attr("ligne") == "D")
-                                            return durationD / (divider * zoom_factor);
+                                        // return durationD / (divider * zoom_factor);
+                                            return durationD / divider;
                                         else if (d3.select(data).attr("ligne") == "F1")
-                                            return durationF1 / (divider * zoom_factor);
+                                        // return durationF1 / (divider * zoom_factor);
+                                            return durationF1 / divider;
                                         else if (d3.select(data).attr("ligne") == "F2")
-                                            return durationF2 / (divider * zoom_factor);
+                                        // return durationF2 / (divider * zoom_factor);
+                                            return durationF2 / divider;
                                         else
-                                            return duration / zoom_factor;
+                                        // return duration / zoom_factor;
+                                            return duration;
                                     })
                                     .ease("linear")
                                     .remove()
@@ -922,20 +867,9 @@ function animateMetro() {
 
                                                                         var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
                                                                         // if (current_station_id == "7606") {
-                                                                        // console.log(journey_id);
-                                                                        // console.log(index);
 
-                                                                        // console.log(journeys[sens][index]);
-
-                                                                        // var journey_id = Object.keys(journeys[sens])[index];
-                                                                        // var journey = journeys[sens][journey_id];
-
-                                                                        // console.log(stop_times_hash[current_line][current_day][sens][journey_id]);
-                                                                        // var journey = journeys[sens][index];
                                                                         var journey = stop_times_hash[current_line][current_day][sens][journey_id];
-                                                                        // console.log(journey);
                                                                         var passage_time = journey[current_station_id];
-                                                                        // console.log(passage_time)
                                                                         var passage_date = new Date(current_day + "T" + passage_time);
 
                                                                         passage_date.setTime(passage_date.getTime() + passage_date.getTimezoneOffset() * 60 * 1000);
@@ -1053,6 +987,7 @@ function animateMetro() {
                 // Mais setInterval() ne permet pas de modifier la durée de l'interval de façon dynamique
                 getDelayBetweenMetro());
         }
+        // }
     });
 
 }
