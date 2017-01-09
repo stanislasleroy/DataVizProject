@@ -5,6 +5,7 @@
             right: 0;
             bottom: 0;
             left: 0;
+            font-family: Verdana, Geneva, sans-serif;
         }
         
         #map {
@@ -43,7 +44,7 @@
         
         .left {
             float: left;
-            font-family: Verdana, Geneva, sans-serif;
+            /*font-family: Verdana, Geneva, sans-serif;*/
             font-size: 18px;
             margin-top: 10px;
             margin-left: 15px;
@@ -51,14 +52,14 @@
         
         .right {
             float: right;
-            font-family: Verdana, Geneva, sans-serif;
+            /*font-family: Verdana, Geneva, sans-serif;*/
             font-size: 18px;
             margin-top: 10px;
             margin-right: 15px;
         }
         
         .center {
-            font-family: Verdana, Geneva, sans-serif;
+            /*font-family: Verdana, Geneva, sans-serif;*/
             font-size: 20px;
             margin: 0 auto !important;
             display: inline-block;
@@ -72,4 +73,10 @@
             fill: white;
             stroke: black;
             opacity: 0.8;
+        }
+        
+        .ui-dialog>.ui-widget-header {
+            background: white;
+            color: teal;
+            font-size: 18px;
         }
