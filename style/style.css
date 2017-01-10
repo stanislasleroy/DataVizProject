@@ -196,7 +196,7 @@
         
         .full-circle {
             background-color: white;
-            border: 3px solid red;
+            border: 2px solid red;
             height: 150px;
             width: 150px;
             -moz-border-radius: 75px;

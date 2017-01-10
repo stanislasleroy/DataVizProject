@@ -755,7 +755,8 @@ function animateMetro() {
                     if (!continue_draw_trains)
                         clearInterval(interval);
                     else {
-                        if (index >= journeys[sens].length) {
+
+                        if (index === journeys[sens].length) {
                             clearInterval(interval);
                             console.log("Arrêt des métros");
                         } else {
@@ -769,7 +770,9 @@ function animateMetro() {
                             // if (sens == "ALLER" || sens == "RETOUR") {
 
                             var journey_id = journeys[sens][index]["id"];
+                            // var journey_id = journey["id"];
                             var departure_time = journeys[sens][index]["departure_time"];
+                            // var departure_time = journey["departure_time"];
 
                             // Mise à jour de l'affichage de l'heure
                             if (sens == "ALLER" && current_line === "304")

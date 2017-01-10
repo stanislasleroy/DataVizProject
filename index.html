@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <!--Loader-->
+    <!-- Loader pendant le chargement des fichiers -->
     <!--<div class="se-pre-con"></div>-->
 
     <div class="wrap">
@@ -23,11 +23,6 @@
             <div class="left">
                 <input id="slider" type="range" value="1" min="1" max="100" step="1" />
                 <span id="day"></span>
-                <!--<img src="img/play.png" height="24" width="24" onclick="javascript:run()">-->
-                <!--<input type="image" src="img/play.png" onClick="javascript:run()" />-->
-                <!--<span class="ui-icon ui-icon-play" />-->
-                <!--<input type="button" onClick="javascript:run()" value="&#9658;" />-->
-                <!--<button style="background: url(img/play.png)" />-->
             </div>
             <div class="right">
                 <a href="#" title="Play video" class="play"></a>
@@ -71,11 +66,7 @@
             De fait, les lignes à faible fréquence (ligne C) s'arrêteteront plus tôt dans la visualisation que les lignes à forte fréquence (ligne D).
         </p>
         <p>
-            <span style="color:teal;"><b>Légende : </b></span>
-            <!--<span class="color-box" style="background-color: dodgerblue;" </span><br/><br/>
-                <span class="color-box" style="background-color: #FF850A;"></span><br/><br/>
-                <span class="color-box" style="background-color: #FF850A;"></span>Nombre d'emplacements libres disponibles<br/><br/>-->
-
+            <span style="color:teal;"><b>Légende :</b></span>
             <ul class="ordering">
                 <li><span></span>Nombre de vélos disponibles</li>
                 <li><span></span>Nombre d'emplacements libres disponibles</li>
@@ -308,6 +299,7 @@
             var effective_stop_points;
 
             for (var i = 3; i < 9; i++) {
+                // Test
                 // for (var i = 5; i < 6; i++) {
                 effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
                 loadStopPoints(files[i], effective_stop_points);
@@ -322,10 +314,10 @@
             console.log("Affichage des stations de métro");
             displayMetroStations(stop_points);
 
-            // // Affichage des lignes de tram et de bus
-            // // Placé à la fin pour augmenter la taille du svg, 
-            // // sinon le svg est borné par les lignes de métro
-            // // si l'affichage des lignes secondaires est en amont
+            // Affichage des lignes de tram et de bus
+            // Placé à la fin pour augmenter la taille du svg, 
+            // sinon le svg est borné par les lignes de métro
+            // si l'affichage des lignes secondaires est en amont
             // console.log("Affichage des lignes secondaires");
             // displaySecondaryLine(files[10], "pathTram");
             // displaySecondaryLine(files[11], "pathBus");
