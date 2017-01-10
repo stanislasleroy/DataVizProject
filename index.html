@@ -2,20 +2,36 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="leaflet.css" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="d3.v3.min.js"></script>
-    <script src="d3-queue.v3.min.js"></script>
-    <script src="d3-legend.js"></script>
-    <script src="leaflet.js" type="text/javascript"></script>
-    <script src="functions.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="style/leaflet.css" />
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/jquery-ui.css" />
+    <script src="scripts/d3.v3.min.js"></script>
+    <script src="scripts/d3-queue.v3.min.js"></script>
+    <script src="scripts/d3-legend.js"></script>
+    <script src="scripts/leaflet.js" type="text/javascript"></script>
+    <script src="scripts/functions.js" type="text/javascript"></script>
+    <script src="scripts/jquery-3.1.1.js" type="text/javascript"></script>
+    <script src="scripts/jquery-ui.js" type="text/javascript"></script>
 </head>
 
 <body>
+    <!--Loader-->
+    <!--<div class="se-pre-con"></div>-->
+
     <div class="wrap">
         <div class="left">
-            <input id="slider" type="range" value="1" min="1" max="100" step="1" />
-            <span id="day"></span>
+            <div class="left">
+                <input id="slider" type="range" value="1" min="1" max="100" step="1" />
+                <span id="day"></span>
+                <!--<img src="img/play.png" height="24" width="24" onclick="javascript:run()">-->
+                <!--<input type="image" src="img/play.png" onClick="javascript:run()" />-->
+                <!--<span class="ui-icon ui-icon-play" />-->
+                <!--<input type="button" onClick="javascript:run()" value="&#9658;" />-->
+                <!--<button style="background: url(img/play.png)" />-->
+            </div>
+            <div class="right">
+                <a href="#" title="Play video" class="play"></a>
+            </div>
         </div>
         <div class="right">
             <span id="hour"></span>
@@ -27,218 +43,308 @@
         </div>
     </div>
 
-    <div id="map">
+    <div id="map" />
 
-        <script>
-            var initial_zoom = 14;
-            var current_zoom = initial_zoom;
-            var zoom_factor = 1;
+    <div id="dialog" class="flora" title="Bienvenue dans Vélo'v DataViz !">
 
-            var needReset = true;
+        <p>
+            <span style="color:teal;"><b>À propos de Vélo'v</b></span>
+        </p>
+        <p>
+            Vélo'v est un service de partage de vélos dans la métropole lyonnaise. Lancé en mai 2005, le service Vélo'v comprend 349 stations à travers Lyon et Villeurbanne et environ 4000 vélos. Les données de ce service sont en partie en Open Data et concernent
+            la localisation des différentes stations et l'historique (mis à jour en temps réel) du nombre de vélos disponibles.
+        </p>
+        <p>
+            <span style="color:teal;"><b>La visualisation</b></span>
+        </p>
+        <p>
+            Les vélos en libre circulation du service Vélo’v sont utilisés par un grand nombre d’usagers à Lyon. Certaines personnes combinent plusieurs moyens de transport pour arriver à destination (trajet multimodal) : bus, métro et vélo.
+        </p>
+        <p>Cette visualisation permet de mettre en valeur l'impact de l'arrivée des rames de métro sur l’évolution du parc de vélos des différentes stations de Vélo’v voisines dans la ville de Lyon. Elle s'adresse aux gestionnaires d'infrastructure de transport
+            et aux gestionnaires du service Vélov afin qu'ils puissent avoir un aperçu de la façon dont les différentes modalités de transport s'articulent entre elles et de les faire évoluer si besoin.
+        </p>
+        <p>
+            Une évolution pourrait être réalisée pour ajouter l'impact du tram et du bus, à l'instar de ce qui a été fait pour le métro.
+        </p>
+        <p>
+            <span class="ui-icon ui-icon-notice" style="float:left; margin:0 7px 50px 0;"></span> Le temps n'est pas synchronisé entre les différentes rames. Cela signifie que les rames de métro sont créées et lancées pour chaque trajet (Aller ou Retour).
+            De fait, les lignes à faible fréquence (ligne C) s'arrêteteront plus tôt dans la visualisation que les lignes à forte fréquence (ligne D).
+        </p>
+        <p>
+            <span style="color:teal;"><b>Légende : </b></span>
+            <!--<span class="color-box" style="background-color: dodgerblue;" </span><br/><br/>
+                <span class="color-box" style="background-color: #FF850A;"></span><br/><br/>
+                <span class="color-box" style="background-color: #FF850A;"></span>Nombre d'emplacements libres disponibles<br/><br/>-->
 
-            // Temps de trajet théorique des différents lignes (ms)
-            var durationA = 1260000; // 21 minutes
-            var durationB = 1020000; // 17 minutes
-            var durationC = 540000; // 9 minutes
-            var durationD = 1500000; // 25 minutes
-            var duration = 10000;
+            <ul class="ordering">
+                <li><span></span>Nombre de vélos disponibles</li>
+                <li><span></span>Nombre d'emplacements libres disponibles</li>
+                <li><span class="full-circle"></span>Nombre de vélos emprunté à chaque arrivée de métro</li>
+            </ul>
+        </p>
+    </div>
 
-            // var divider  = 1000;
-            var divider = 100;
-            var delay_between_metro = 2000;
-            // var delay_between_metro = 500; // milliseconds
-            // var ring_interval = 500;
-            var ring_interval = 100;
 
-            // Distance pour prendre en compte les stations Vélov voisine
-            // des stations de métro
-            var distanceToStation = 200;
 
-            var details_line = {};
-            var selectedLine = "";
+    <script>
+        $(document).ready(function() {
+            $("#dialog").dialog({
+                modal: true,
+                maxWidth: 900,
+                maxHeight: 650,
+                width: 900,
+                height: 650,
+                buttons: {
+                    "OK": function() {
+                        $(this).dialog("close");
+                        // run();
+                    }
+                }
+            });
+        });
 
-            var stop_points = {};
-            stop_points['type'] = 'FeatureCollection';
-            stop_points['features'] = [];
+        // $('div#dialog').on('dialogclose', function(event) {
+        //     run();
+        // });
 
-            var total_bike_stations = {};
-            var nearby_bike_stations = {};
-            var bike_stations_history = {};
+        var icon = $('.play');
+        icon.click(function() {
+            icon.toggleClass('active');
+            run();
+            $(".play").hide();
+            return false;
+        });
 
-            var stop_times = {};
-            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var initial_zoom = 14;
+        var current_zoom = initial_zoom;
+        var zoom_factor = 1;
 
-            var current_day = "2016-12-23";
-            // var current_day;
-            var available_days = [];
+        var needReset = true;
 
-            var continue_draw_trains = true;
+        // Temps de trajet théorique des différents lignes (ms)
+        var durationA = 1260000; // 21 minutes
+        var durationB = 1020000; // 17 minutes
+        var durationC = 540000; // 9 minutes
+        var durationD = 1500000; // 25 minutes
+        var durationF1 = 200000; // 3m20s
+        var durationF2 = 120000; // 2 minutes
+        var duration = 10000;
 
-            var map = L.map('map').setView([45.766000, 4.865000], initial_zoom);
+        // var divider  = 1000;
+        // var divider = 200;
+        // var divider = 100;
+        var divider = 50;
+        var delay_between_metro = 2000;
+        // var delay_between_metro = 1000;
+        // var delay_between_metro = 500; // milliseconds
+        // var ring_interval = 500;
+        var ring_interval = 250;
 
-            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-                maxZoom: 18,
-                id: 'stanislasleroy.293gad2b',
-                accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
-            }).addTo(map);
+        // Distance pour prendre en compte les stations Vélov voisine
+        // des stations de métro
+        var distanceToStation = 200;
 
-            // Affichage des lignes de métro cachées
-            map.on('click', function(d) {
-                var e = d.originalEvent.path[0];
+        var details_line = {};
+        var selectedLine = "";
 
-                if (!d3.select(e).attr("class")) {
+        var stop_points = {};
+        stop_points['type'] = 'FeatureCollection';
+        stop_points['features'] = [];
 
-                    selectedLine = "";
-                    d3.selectAll('.train').each(function(d, i) {
+        var total_bike_stations = {};
+        var nearby_bike_stations = {};
+        var bike_stations_history = {};
+
+        var stop_times = {};
+        var stop_times_hash = {};
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        var current_day = "2016-12-23";
+        // var current_day;
+        var available_days = [];
+
+        var continue_draw_trains = true;
+
+        var map = L.map('map').setView([45.766000, 4.850000], initial_zoom);
+
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            maxZoom: 18,
+            id: 'stanislasleroy.293gad2b',
+            accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
+        }).addTo(map);
+
+        // Affichage des lignes de métro cachées
+        map.on('click', function(d) {
+            var e = d.originalEvent.path[0];
+
+            if (!d3.select(e).attr("class")) {
+
+                selectedLine = "";
+                d3.selectAll('.train').each(function(d, i) {
+                    d3.select(this).classed("hiddenLine", false);
+                });
+
+                if (map.getZoom() >= 15) {
+                    d3.selectAll('.pie').each(function(d, i) {
                         d3.select(this).classed("hiddenLine", false);
                     });
-
-                    if (map.getZoom() >= 15) {
-                        d3.selectAll('.pie').each(function(d, i) {
-                            d3.select(this).classed("hiddenLine", false);
-                        });
-                    }
                 }
-            })
-
-            var transform = d3.geo.transform({
-                point: projectPoint
-            });
-
-            var __path__ = d3.geo.path().projection(transform);
-
-            var svg = d3.select(map.getPanes().overlayPane)
-                .append("svg");
-
-            var g = svg.append("g").attr("class", "leaflet-zoom-hide");
-
-            var tooltip = d3.select('body').append('div')
-                .attr('class', 'hidden tooltip');
-
-
-            var pie = d3.layout.pie()
-                .sort(null)
-                .value(function(d) {
-                    return d.number;
-                });
-
-            var arc = d3.svg.arc()
-                .outerRadius(30)
-                .innerRadius(20);
-
-            var color = d3.scale.category10();
-
-
-            d3.select("#slider").on("input", function() {
-                //    console.log(+this.value);
-                d3.select('#day').html(available_days[+this.value - 1]);
-
-                continue_draw_trains = false;
-
-                //    current_day = available_days[+this.value - 1];
-                d3.selectAll('.train').each(function(d, i) {
-                    d3.select(this).remove();
-                });
-
-                continue_draw_trains = true;
-                details_line = {};
-                animateMetro(available_days[+this.value - 1]);
-            });
-
-            d3.queue()
-                .defer(d3.json, "point_arret.json")
-                .defer(d3.json, "ligne_metro.json")
-                .defer(d3.json, "stations.json")
-                .defer(d3.json, "neptune/301.json")
-                .defer(d3.json, "neptune/302.json")
-                .defer(d3.json, "neptune/303.json")
-                .defer(d3.json, "neptune/304.json")
-                .defer(d3.json, "neptune/325.json")
-                .defer(d3.json, "neptune/326.json")
-                .defer(d3.json, "GetVelovHistory/history4.json")
-                .defer(d3.json, "tram.json")
-                .defer(d3.json, "bus.json")
-                .awaitAll(displayPrimaryLine);
-
-
-            /*
-             * Affichage des lignes de métro et des stations
-             */
-            function displayPrimaryLine(error, files) {
-
-                // Affichage des lignes de Métro
-                console.log("Affichage des lignes de Métro");
-                displayLineStations(files[1]);
-
-                // Affichage des stations Vélo'v
-                console.log("Affichage des stations Vélo'v");
-                displayBikeStations(files[2]);
-
-                total_bike_stations = files[2];
-                loadBikeStationsHistory(files[9]);
-
-
-                // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
-                for (var i in files[1].features) {
-                    var id = files[11].features[i].properties.code_titan;
-                    id = id.substring(0, 3);
-                    details_line[id] = {};
-                    details_line[id].id = id;
-                    details_line[id].color = files[1].features[i].properties.couleur;
-                }
-
-                // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
-                for (var i in files[0].features) {
-
-                    var id = files[0].features[i].properties.desserte.substring(0, 3);
-
-                    if (details_line[id]) {
-
-                        if (!details_line[id].stops)
-                            details_line[id].stops = [];
-
-                        var stop = {};
-                        stop.geo = {};
-                        stop.geo.x = files[0].features[i].geometry.coordinates[0];
-                        stop.geo.y = files[0].features[i].geometry.coordinates[1];
-                        details_line[id].stops.push(stop);
-                    }
-                }
-
-                var effective_stop_points;
-
-                // for (var i = 3; i < 9; i++) {
-                for (var i = 5; i < 6; i++) {
-                    effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
-                    loadStopPoints(files[i], effective_stop_points);
-                    loadStopTimes(files[i], effective_stop_points);
-                }
-
-                // Recherche des stations Vélo'v voisines des stations de métro
-                console.log("Recherche des stations Vélo'v voisines");
-                getNearbyBikeStations();
-
-                // Affichage des stations de métro
-                console.log("Affichage des stations de métro");
-                displayMetroStations(stop_points);
-
-                // Affichage des lignes de tram et de bus
-                // Placé à la fin pour augmenter la taille du svg, 
-                // sinon le svg est borné par les lignes de métro
-                // si l'affichage des lignes secondaires est en amont
-                console.log("Affichage des lignes secondaires");
-                displaySecondaryLine(files[10], "pathTram");
-                displaySecondaryLine(files[11], "pathBus");
-
-                // Affichage des cercles concentriques
-                console.log("Affichage des cercles concentriques");
-                displayDonuts();
-
-                // Animation des rames de métro
-                animateMetro(available_days[+this.value - 1]);
             }
-        </script>
+        })
+
+        var transform = d3.geo.transform({
+            point: projectPoint
+        });
+
+        var __path__ = d3.geo.path().projection(transform);
+
+        var svg = d3.select(map.getPanes().overlayPane)
+            .append("svg");
+
+        var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+        var tooltip = d3.select('body').append('div')
+            .attr('class', 'hidden tooltip');
+
+
+        var pie = d3.layout.pie()
+            .sort(null)
+            .value(function(d) {
+                return d.number;
+            });
+
+        var arc = d3.svg.arc()
+            .outerRadius(30)
+            .innerRadius(20);
+
+        var color = d3.scale.category10();
+
+
+        d3.select("#slider").on("input", function() {
+            //    console.log(+this.value);
+            d3.select('#day').html(available_days[+this.value - 1]);
+
+            continue_draw_trains = false;
+
+            //    current_day = available_days[+this.value - 1];
+            d3.selectAll('.train').each(function(d, i) {
+                d3.select(this).remove();
+            });
+
+            continue_draw_trains = true;
+            details_line = {};
+            animateMetro(available_days[+this.value - 1]);
+        });
+
+        d3.queue()
+            .defer(d3.json, "data/point_arret.json")
+            .defer(d3.json, "data/ligne_metro.json")
+            .defer(d3.json, "data/stations.json")
+            .defer(d3.json, "neptune/301.json")
+            .defer(d3.json, "neptune/302.json")
+            .defer(d3.json, "neptune/303.json")
+            .defer(d3.json, "neptune/304.json")
+            .defer(d3.json, "neptune/325.json")
+            .defer(d3.json, "neptune/326.json")
+            .defer(d3.json, "GetVelovHistory/history4.json")
+            .defer(d3.json, "data/tram.json")
+            .defer(d3.json, "data/bus.json")
+            .awaitAll(displayPrimaryLine);
+
+
+        /*
+         * Affichage des lignes de métro et des stations
+         */
+        function displayPrimaryLine(error, files) {
+
+            // Affichage des lignes de tram et de bus
+            // Placé à la fin pour augmenter la taille du svg, 
+            // sinon le svg est borné par les lignes de métro
+            // si l'affichage des lignes secondaires est en amont
+            console.log("Affichage des lignes secondaires");
+            displaySecondaryLine(files[10], "pathTram");
+            displaySecondaryLine(files[11], "pathBus");
+
+            // Affichage des lignes de Métro
+            console.log("Affichage des lignes de Métro");
+            displayMetroLines(files[1]);
+
+            // Affichage des stations Vélo'v
+            console.log("Affichage des stations Vélo'v");
+            displayBikeStations(files[2]);
+
+            total_bike_stations = files[2];
+            loadBikeStationsHistory(files[9]);
+
+
+            // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
+            for (var i in files[1].features) {
+                var id = files[11].features[i].properties.code_titan;
+                id = id.substring(0, 3);
+                details_line[id] = {};
+                details_line[id].id = id;
+                details_line[id].color = files[1].features[i].properties.couleur;
+            }
+
+            // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
+            for (var i in files[0].features) {
+
+                var id = files[0].features[i].properties.desserte.substring(0, 3);
+
+                if (details_line[id]) {
+
+                    if (!details_line[id].stops)
+                        details_line[id].stops = [];
+
+                    var stop = {};
+                    stop.geo = {};
+                    stop.geo.x = files[0].features[i].geometry.coordinates[0];
+                    stop.geo.y = files[0].features[i].geometry.coordinates[1];
+                    details_line[id].stops.push(stop);
+                }
+            }
+
+            var effective_stop_points;
+
+            for (var i = 3; i < 9; i++) {
+                // for (var i = 5; i < 6; i++) {
+                effective_stop_points = getEffectiveStopPointsForJSON(files[i]);
+                loadStopPoints(files[i], effective_stop_points);
+                loadStopTimes(files[i], effective_stop_points);
+            }
+
+            // Recherche des stations Vélo'v voisines des stations de métro
+            console.log("Recherche des stations Vélo'v voisines");
+            getNearbyBikeStations();
+
+            // Affichage des stations de métro
+            console.log("Affichage des stations de métro");
+            displayMetroStations(stop_points);
+
+            // // Affichage des lignes de tram et de bus
+            // // Placé à la fin pour augmenter la taille du svg, 
+            // // sinon le svg est borné par les lignes de métro
+            // // si l'affichage des lignes secondaires est en amont
+            // console.log("Affichage des lignes secondaires");
+            // displaySecondaryLine(files[10], "pathTram");
+            // displaySecondaryLine(files[11], "pathBus");
+
+            // Affichage des cercles concentriques
+            console.log("Affichage des cercles concentriques");
+            displayDonuts();
+
+            // Animation des rames de métro
+            // animateMetro(available_days[+this.value - 1]);
+            $(".ui-dialog-buttonpane button:contains('OK')").button("enable");
+        }
+
+        function run() {
+            // Animation des rames de métro
+            // console.log(available_days[+this.value - 1]);
+            animateMetro(available_days[+this.value - 1]);
+        }
+    </script>
 </body>
 
 </html>
