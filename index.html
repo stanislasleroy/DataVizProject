@@ -78,6 +78,9 @@
 
 
     <script>
+        // On cache le bouton play tant que les données ne sont pas chargées
+        $(".play").hide();
+
         $(document).ready(function() {
             $("#dialog").dialog({
                 modal: true,
@@ -123,8 +126,8 @@
 
         // var divider  = 1000;
         // var divider = 200;
-        // var divider = 100;
-        var divider = 50;
+        var divider = 200;
+        // var divider = 50;
         var delay_between_metro = 2000;
         // var delay_between_metro = 1000;
         // var delay_between_metro = 500; // milliseconds
@@ -156,7 +159,7 @@
 
         var continue_draw_trains = true;
 
-        var map = L.map('map').setView([45.766000, 4.850000], initial_zoom);
+        var map = L.map('map').setView([45.756000, 4.850000], initial_zoom);
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -326,14 +329,12 @@
             console.log("Affichage des cercles concentriques");
             displayDonuts();
 
-            // Animation des rames de métro
-            // animateMetro(available_days[+this.value - 1]);
-            $(".ui-dialog-buttonpane button:contains('OK')").button("enable");
+            // $(".ui-dialog-buttonpane button:contains('OK')").button("enable");
+            $(".play").show();
         }
 
         function run() {
             // Animation des rames de métro
-            // console.log(available_days[+this.value - 1]);
             animateMetro(available_days[+this.value - 1]);
         }
     </script>
