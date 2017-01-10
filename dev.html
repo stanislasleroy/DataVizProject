@@ -95,14 +95,13 @@
                 width: 900,
                 height: 650,
                 buttons: {
-                    "C'est parti !": function() {
+                    "OK": function() {
                         $(this).dialog("close");
                         // run();
                     }
                 }
             });
         });
-
 
         // $('div#dialog').on('dialogclose', function(event) {
         //     run();
@@ -112,6 +111,7 @@
         icon.click(function() {
             icon.toggleClass('active');
             run();
+            $(".play").hide();
             return false;
         });
 
@@ -336,6 +336,7 @@
 
             // Animation des rames de métro
             // animateMetro(available_days[+this.value - 1]);
+            $(".ui-dialog-buttonpane button:contains('OK')").button("enable");
         }
 
         function run() {
