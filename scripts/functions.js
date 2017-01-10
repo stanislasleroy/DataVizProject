@@ -2,6 +2,12 @@
 
 function reset(_path, _collection, _feature) {
 
+
+    /* 
+     * Mise à jour des durées des rames si modification du zoom
+     * Non fonctionnel
+     */
+
     // if (current_zoom > map.getZoom()) {
     //     zoom_factor *= 2;
     // } else if (current_zoom < map.getZoom()) {
@@ -9,12 +15,6 @@ function reset(_path, _collection, _feature) {
     // }
 
     // console.log(zoom_factor);
-
-
-    /* 
-     * Mise à jour des durées des rames si modification du zoom
-     * Non fonctionnel
-     */
 
     // if (current_zoom != map.getZoom()) {
 
@@ -94,16 +94,20 @@ function getTransform(_node) {
     return "translate(" + [p.x, p.y] + ")";
 }
 
-// Use Leaflet to implement a D3 geometric transformation.
+/*
+ *Use Leaflet to implement a D3 geometric transformation.
+ */
 function projectPoint(_x, _y) {
     var point = map.latLngToLayerPoint(new L.LatLng(_y, _x));
     this.stream.point(point.x, point.y);
 }
 
-// Retourne la distance entre 2 points (lat,lon)
+/*
+ * Retourne la distance entre 2 points (lat,lon)
+ */
 function getDistance(_lat1, _lat2, _lon1, _lon2) {
 
-    var earthRadius = 6371000; //meters
+    var earthRadius = 6371000; // mètres
 
     var dLat = toRad(_lat2 - _lat1);
     var dLng = toRad(_lon2 - _lon1);
@@ -117,6 +121,9 @@ function getDistance(_lat1, _lat2, _lon1, _lon2) {
     return earthRadius * c;
 }
 
+/*
+ * Conversion en radians
+ */
 function toRad(_value) {
     return _value * Math.PI / 180;
 }
@@ -278,9 +285,12 @@ function loadStopTimes(_line) {
     }
 }
 
-// Fonction de comparaison des horaires
-// Dans une même journée, 05:00 est avant 01:00 !!
-// On prend 04:00 comme repère
+
+/*
+ * Fonction de comparaison des horaires
+ * Dans une même journée, 05:00 est avant 01:00 !!
+ * On prend 04:00 comme milieu
+ */
 function compare(a, b) {
 
     if ((a.departure_time <= "04:00:00" && b.departure_time < "04:00:00") ||
@@ -290,7 +300,7 @@ function compare(a, b) {
         if (a.departure_time > b.departure_time)
             return 1;
         return 0;
-        w
+
     } else {
 
         if ((a.departure_time <= "04:00:00" && b.departure_time > "04:00:00")) {
@@ -395,6 +405,9 @@ function getExtremitiesOfJourney(_line) {
     return hash;
 }
 
+/*
+ *
+ */
 function getNearbyBikeStations() {
 
     for (var i = 0; i < stop_points.features.length; i++) {
@@ -423,6 +436,9 @@ function getNearbyBikeStations() {
     }
 }
 
+/*
+ *
+ */
 function loadBikeStationsHistory(_history) {
 
     console.log("loadBikeStationsHistory");
@@ -500,8 +516,6 @@ function loadBikeStationsHistory(_history) {
  * Affichage des lignes secondaires
  */
 function displaySecondaryLine(_data, _type) {
-
-    // console.log(_data);
 
     var path = d3.geo.path().projection(transform);
 
@@ -610,7 +624,7 @@ function displayMetroStations(_data) {
 }
 
 /*
- * Affichage des stations de métro
+ * Affichage des lignes de métro
  */
 function displayMetroLines(_data) {
 
@@ -738,6 +752,7 @@ function animateMetro() {
 
         var current_line = d3.select(data).attr("code_titan");
 
+        // Test
         // if (current_line === "301") {
 
         var sens = d3.select(data).attr("sens").toUpperCase();
@@ -770,9 +785,7 @@ function animateMetro() {
                             // if (sens == "ALLER" || sens == "RETOUR") {
 
                             var journey_id = journeys[sens][index]["id"];
-                            // var journey_id = journey["id"];
                             var departure_time = journeys[sens][index]["departure_time"];
-                            // var departure_time = journey["departure_time"];
 
                             // Mise à jour de l'affichage de l'heure
                             if (sens == "ALLER" && current_line === "304")
@@ -800,6 +813,13 @@ function animateMetro() {
                                 .classed("t" + d3.select(data).attr("code_titan"), d3.select(data).attr("code_titan"))
                                 .transition()
                                 .duration(function() {
+
+                                    // cf. fonction reset()
+                                    // Lorsque l'on zoom/dezoom, la vitesse est rames augmente/diminue dans la mesure 
+                                    // où la taille des chemins a parcourir varie sans que la durée n'évolue.
+                                    // Il faut donc modifier la duration pour obtenir une vitesse correcte.
+                                    // Le code commenté permet de faire cela (fonctionne mais comportement pas parfait)
+
                                     if (d3.select(data).attr("ligne") == "A")
                                     // return durationA / (divider * zoom_factor);
                                         return durationA / divider;
@@ -862,6 +882,8 @@ function animateMetro() {
                                                     if (dist_to_bike_station < distanceToStation) {
 
                                                         if (selectedLine == "" || (selectedLine != "" && d3.select(data).attr("code_titan") == selectedLine)) {
+
+                                                            // Test
                                                             // if (d3.select(data).attr("code_titan") == "301") {
 
                                                             var id = "velov-" + bike_station_id;
@@ -874,6 +896,8 @@ function animateMetro() {
                                                                 if (h[current_day]) {
 
                                                                     var current_station_id = value.properties.id.substring(value.properties.id.lastIndexOf(":") + 1);
+
+                                                                    // Test
                                                                     // if (current_station_id == "7606") {
 
                                                                     var journey = stop_times_hash[current_line][current_day][sens][journey_id];
@@ -915,6 +939,7 @@ function animateMetro() {
                                                                         var available_bikes_offset = h[current_day][date_after.toLocaleTimeString()].available_bikes - h[current_day][date_before.toLocaleTimeString()].available_bikes;
 
                                                                         if (available_bikes_offset < 0) {
+                                                                            // Test
                                                                             // if (available_bikes_offset < 0 && current_station_id == "6004") {
                                                                             // if (available_bikes_offset < 0 && current_station_id == "7608") {
 
@@ -1000,8 +1025,15 @@ function animateMetro() {
 
 }
 
+/*
+ * Affichage des donuts pour le mode micro
+ * Affiche le nombre de vélos disponibles / nombres d'emplacements libres
+ */
 function displayDonuts() {
 
+    // Initialisation en dur
+    // Il faudrait reprendre la valeur idoine de chaque station available_bike_stands
+    // mais cela ne change rien, au départ le donuts est entièrement orange.
     var data1 = [{
         "type": "available_bikes",
         "number": 0
