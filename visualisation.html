@@ -80,6 +80,10 @@
     <script>
         // On cache le bouton play tant que les données ne sont pas chargées
         $(".play").hide();
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         $(document).ready(function() {
             $("#dialog").dialog({
                 modal: true,
@@ -95,9 +99,17 @@
                 }
             });
         });
+<<<<<<< HEAD
         // $('div#dialog').on('dialogclose', function(event) {
         //     run();
         // });
+=======
+
+        // $('div#dialog').on('dialogclose', function(event) {
+        //     run();
+        // });
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         var icon = $('.play');
         icon.click(function() {
             icon.toggleClass('active');
@@ -105,10 +117,20 @@
             $(".play").hide();
             return false;
         });
+<<<<<<< HEAD
         var initial_zoom = 14;
         var current_zoom = initial_zoom;
         var zoom_factor = 1;
         var needReset = true;
+=======
+
+        var initial_zoom = 14;
+        var current_zoom = initial_zoom;
+        var zoom_factor = 1;
+
+        var needReset = true;
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         // Temps de trajet théorique des différents lignes (ms)
         var durationA = 1260000; // 21 minutes
         var durationB = 1020000; // 17 minutes
@@ -117,6 +139,10 @@
         var durationF1 = 200000; // 3m20s
         var durationF2 = 120000; // 2 minutes
         var duration = 10000;
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         // var divider  = 1000;
         // var divider = 200;
         var divider = 200;
@@ -126,6 +152,7 @@
         // var delay_between_metro = 500; // milliseconds
         // var ring_interval = 500;
         var ring_interval = 250;
+<<<<<<< HEAD
         // Distance pour prendre en compte les stations Vélov voisine
         // des stations de métro
         var distanceToStation = 200;
@@ -145,20 +172,64 @@
         var available_days = [];
         var continue_draw_trains = true;
         var map = L.map('map').setView([45.756000, 4.850000], initial_zoom);
+=======
+
+        // Distance pour prendre en compte les stations Vélov voisine
+        // des stations de métro
+        var distanceToStation = 200;
+
+        var details_line = {};
+        var selectedLine = "";
+
+        var stop_points = {};
+        stop_points['type'] = 'FeatureCollection';
+        stop_points['features'] = [];
+
+        var total_bike_stations = {};
+        var nearby_bike_stations = {};
+        var bike_stations_history = {};
+
+        var stop_times = {};
+        var stop_times_hash = {};
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        var current_day = "2016-12-23";
+        // var current_day;
+        var available_days = [];
+
+        var continue_draw_trains = true;
+
+        var map = L.map('map').setView([45.756000, 4.850000], initial_zoom);
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
             maxZoom: 18,
             id: 'stanislasleroy.293gad2b',
             accessToken: 'pk.eyJ1Ijoic3RhbmlzbGFzbGVyb3kiLCJhIjoiY2l3N29ieTFhMDAwbzJ6bzYydmM0cjM4cyJ9.a9t7av6dljaj5TN_FA4XvQ'
         }).addTo(map);
+<<<<<<< HEAD
         // Affichage des lignes de métro cachées
         map.on('click', function(d) {
             var e = d.originalEvent.path[0];
             if (!d3.select(e).attr("class")) {
+=======
+
+        // Affichage des lignes de métro cachées
+        map.on('click', function(d) {
+            var e = d.originalEvent.path[0];
+
+            if (!d3.select(e).attr("class")) {
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
                 selectedLine = "";
                 d3.selectAll('.train').each(function(d, i) {
                     d3.select(this).classed("hiddenLine", false);
                 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
                 if (map.getZoom() >= 15) {
                     d3.selectAll('.pie').each(function(d, i) {
                         d3.select(this).classed("hiddenLine", false);
@@ -166,6 +237,7 @@
                 }
             }
         })
+<<<<<<< HEAD
         var transform = d3.geo.transform({
             point: projectPoint
         });
@@ -175,11 +247,30 @@
         var g = svg.append("g").attr("class", "leaflet-zoom-hide");
         var tooltip = d3.select('body').append('div')
             .attr('class', 'hidden tooltip');
+=======
+
+        var transform = d3.geo.transform({
+            point: projectPoint
+        });
+
+        var __path__ = d3.geo.path().projection(transform);
+
+        var svg = d3.select(map.getPanes().overlayPane)
+            .append("svg");
+
+        var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+        var tooltip = d3.select('body').append('div')
+            .attr('class', 'hidden tooltip');
+
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         var pie = d3.layout.pie()
             .sort(null)
             .value(function(d) {
                 return d.number;
             });
+<<<<<<< HEAD
         var arc = d3.svg.arc()
             .outerRadius(30)
             .innerRadius(20);
@@ -188,14 +279,38 @@
             //    console.log(+this.value);
             d3.select('#day').html(available_days[+this.value - 1]);
             continue_draw_trains = false;
+=======
+
+        var arc = d3.svg.arc()
+            .outerRadius(30)
+            .innerRadius(20);
+
+        var color = d3.scale.category10();
+
+
+        d3.select("#slider").on("input", function() {
+            //    console.log(+this.value);
+            d3.select('#day').html(available_days[+this.value - 1]);
+
+            continue_draw_trains = false;
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             //    current_day = available_days[+this.value - 1];
             d3.selectAll('.train').each(function(d, i) {
                 d3.select(this).remove();
             });
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             continue_draw_trains = true;
             details_line = {};
             animateMetro(available_days[+this.value - 1]);
         });
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         d3.queue()
             .defer(d3.json, "data/point_arret.json")
             .defer(d3.json, "data/ligne_metro.json")
@@ -210,10 +325,19 @@
             .defer(d3.json, "data/tram.json")
             .defer(d3.json, "data/bus.json")
             .awaitAll(displayPrimaryLine);
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
         /*
          * Affichage des lignes de métro et des stations
          */
         function displayPrimaryLine(error, files) {
+<<<<<<< HEAD
+=======
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             // Affichage des lignes de tram et de bus
             // Placé à la fin pour augmenter la taille du svg, 
             // sinon le svg est borné par les lignes de métro
@@ -221,6 +345,7 @@
             console.log("Affichage des lignes secondaires");
             displaySecondaryLine(files[10], "pathTram");
             displaySecondaryLine(files[11], "pathBus");
+<<<<<<< HEAD
             // Affichage des lignes de Métro
             console.log("Affichage des lignes de Métro");
             displayMetroLines(files[1]);
@@ -229,6 +354,21 @@
             displayBikeStations(files[2]);
             total_bike_stations = files[2];
             loadBikeStationsHistory(files[9]);
+=======
+
+            // Affichage des lignes de Métro
+            console.log("Affichage des lignes de Métro");
+            displayMetroLines(files[1]);
+
+            // Affichage des stations Vélo'v
+            console.log("Affichage des stations Vélo'v");
+            displayBikeStations(files[2]);
+
+            total_bike_stations = files[2];
+            loadBikeStationsHistory(files[9]);
+
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
             for (var i in files[1].features) {
                 var id = files[11].features[i].properties.code_titan;
@@ -237,12 +377,26 @@
                 details_line[id].id = id;
                 details_line[id].color = files[1].features[i].properties.couleur;
             }
+<<<<<<< HEAD
             // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
             for (var i in files[0].features) {
                 var id = files[0].features[i].properties.desserte.substring(0, 3);
                 if (details_line[id]) {
                     if (!details_line[id].stops)
                         details_line[id].stops = [];
+=======
+
+            // On ajoute les codes Titan des lignes de métro pour pouvoir récupérer les points d'arrêts des lignes
+            for (var i in files[0].features) {
+
+                var id = files[0].features[i].properties.desserte.substring(0, 3);
+
+                if (details_line[id]) {
+
+                    if (!details_line[id].stops)
+                        details_line[id].stops = [];
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
                     var stop = {};
                     stop.geo = {};
                     stop.geo.x = files[0].features[i].geometry.coordinates[0];
@@ -250,7 +404,13 @@
                     details_line[id].stops.push(stop);
                 }
             }
+<<<<<<< HEAD
             var effective_stop_points;
+=======
+
+            var effective_stop_points;
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             for (var i = 3; i < 9; i++) {
                 // Test
                 // for (var i = 5; i < 6; i++) {
@@ -258,12 +418,25 @@
                 loadStopPoints(files[i], effective_stop_points);
                 loadStopTimes(files[i], effective_stop_points);
             }
+<<<<<<< HEAD
             // Recherche des stations Vélo'v voisines des stations de métro
             console.log("Recherche des stations Vélo'v voisines");
             getNearbyBikeStations();
             // Affichage des stations de métro
             console.log("Affichage des stations de métro");
             displayMetroStations(stop_points);
+=======
+
+            // Recherche des stations Vélo'v voisines des stations de métro
+            console.log("Recherche des stations Vélo'v voisines");
+            getNearbyBikeStations();
+
+            // Affichage des stations de métro
+
+            console.log("Affichage des stations de métro");
+            displayMetroStations(stop_points);
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             // Affichage des lignes de tram et de bus
             // Placé à la fin pour augmenter la taille du svg, 
             // sinon le svg est borné par les lignes de métro
@@ -271,9 +444,17 @@
             // console.log("Affichage des lignes secondaires");
             // displaySecondaryLine(files[10], "pathTram");
             // displaySecondaryLine(files[11], "pathBus");
+<<<<<<< HEAD
             // Affichage des cercles concentriques
             console.log("Affichage des cercles concentriques");
             displayDonuts();
+=======
+
+            // Affichage des cercles concentriques
+            console.log("Affichage des cercles concentriques");
+            displayDonuts();
+
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
             // $(".ui-dialog-buttonpane button:contains('OK')").button("enable");
             $(".play").show();
         }
@@ -285,4 +466,8 @@
     </script>
 </body>
 
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> b512bc5a35c15857f840797771f4f97f1fbd7a4b
