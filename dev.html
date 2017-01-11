@@ -218,6 +218,7 @@
         var color = d3.scale.category10();
 
 
+        // Contrôle du slider permettant de 
         d3.select("#slider").on("input", function() {
             //    console.log(+this.value);
             d3.select('#day').html(available_days[+this.value - 1]);
