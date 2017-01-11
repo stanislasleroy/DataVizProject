@@ -68,7 +68,7 @@
         <p>
             <span style="display: inline-block;">Le bouton 
             <a href="#" title="Play video" class="play playLegend"></a>
-           apparaît une fois les données chargées. Cliquer dessus pour lancer la visualisation.</span>
+           apparaît dans l'en-tête une fois les données chargées. Cliquer dessus pour lancer la visualisation.</span>
         </p>
         <p>
             <span style="color:teal;"><b>Légende :</b></span>
@@ -80,8 +80,6 @@
         </p>
     </div>
 
-
-
     <script>
         // On cache le bouton play tant que les données ne sont pas chargées
         $("#play").hide();
@@ -90,9 +88,9 @@
             $("#dialog").dialog({
                 modal: true,
                 maxWidth: 900,
-                maxHeight: 650,
+                maxHeight: 670,
                 width: 900,
-                height: 650,
+                height: 670,
                 buttons: {
                     "OK": function() {
                         $(this).dialog("close");
@@ -156,8 +154,9 @@
 
         var stop_times = {};
         var stop_times_hash = {};
-        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+        // Date & Jour courant
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         var current_day = "2016-12-23";
         // var current_day;
         var available_days = [];
@@ -205,7 +204,6 @@
 
         var tooltip = d3.select('body').append('div')
             .attr('class', 'hidden tooltip');
-
 
         var pie = d3.layout.pie()
             .sort(null)
