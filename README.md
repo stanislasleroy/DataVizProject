@@ -15,6 +15,9 @@ https://stanislasleroy.github.io/DataVizProject/
 Les esquisses de design sont disponibles ici :
 https://github.com/stanislasleroy/DataVizProject/tree/master/Design%20Sheets
 
+## Article en anglais présentant le projet : 
+https://github.com/stanislasleroy/DataVizProject/blob/master/rapportDataVizLeroyPicard.pdf
+
 ## Sources des données
 * Localisation des stations Vélo’v :
 http://data.grandlyon.com/equipements/station-vflov/
