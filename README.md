@@ -11,6 +11,10 @@ Master 2 IA - Université Claude Bernard Lyon 1
 ## Démo
 https://stanislasleroy.github.io/DataVizProject/
 
+## Design Sheets
+Les esquisses de design sont disponibles ici :
+https://github.com/stanislasleroy/DataVizProject/tree/master/Design%20Sheets
+
 ## Sources des données
 * Localisation des stations Vélo’v :
 http://data.grandlyon.com/equipements/station-vflov/
